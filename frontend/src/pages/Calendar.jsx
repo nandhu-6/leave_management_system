@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import axios from 'axios';
+import { teamLeaves, allLeaves } from '../services/leaveService';
 import { useAuth } from '../context/AuthContext';
 
 const leaveColors = {
@@ -19,12 +20,11 @@ const Calendar = () => {
   useEffect(() => {
     const fetchLeaves = async () => {
       try {
-        let url = 'http://localhost:7000/api/leave/team-leaves';
-        if (user.role === 'hr') {
-          url = 'http://localhost:7000/api/leave/all';
+        let responseData = await teamLeaves()  // Assuming the fetch calls are async and return Promises;
+        if(user.role === 'hr'){
+           responseData = await allLeaves();
         }
-        const response = await axios.get(url);
-        const leaves = response.data;
+        const leaves = responseData;
         setEvents(
           leaves.map((leave) => ({
             title: `${leave.employee?.name || user.name} (${leave.type})`,

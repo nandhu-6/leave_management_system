@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { submitLeaveAction, PendingApprovalsService } from '../services/leaveService';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -20,12 +21,9 @@ const PendingApprovals = () => {
 
   const fetchTeamLeaves = async () => {
     try {
-      // const response = await axios.get('http://localhost:7000/leaves/team-leaves');
-      const response = await axios.get('http://localhost:7000/leaves/pending-approvals');
-      // const filteredLeaves = response.data.filter(leave => ['pending'].includes(leave.status.toLowerCase()));
-      // setTeamLeaves(filteredLeaves);
-      setTeamLeaves(response.data);
-      console.log("response", response);
+      const data = await PendingApprovalsService(); 
+      setTeamLeaves(data);
+      console.log("response", data);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to fetch teamleaves');
     } finally {
@@ -41,10 +39,7 @@ const PendingApprovals = () => {
 
   const submitAction = async () => {
     try {
-      await axios.post(`http://localhost:7000/leaves/${selectedLeave}/${action}`, {
-        action: actionComment.includes('approve') ? 'approve' : 'reject',
-        comment: actionComment
-      });
+      await submitLeaveAction(selectedLeave, action, actionComment);
       setShowActionModal(false);
       setActionComment('');
       fetchTeamLeaves();

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { getAllEmployees, getManagers, addEmployee, deleteEmployee, updateEmployee } from '../services/employeeService';
 
@@ -231,7 +230,7 @@ const EmployeeManagement = () => {
                     name="id"
                     value={formData.id}
                     onChange={handleInputChange}
-                    className="input mt-1"
+                    className="input mt-1 h-8"
                     required
                   />
                 </div>
@@ -245,7 +244,7 @@ const EmployeeManagement = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="input mt-1"
+                    className="input mt-1 h-8"
                     required
                   />
                 </div>
@@ -260,7 +259,7 @@ const EmployeeManagement = () => {
                     name="role"
                     value={formData.role}
                     onChange={handleInputChange}
-                    className="input mt-1"
+                    className="input mt-1 h-8"
                     required
                   >
                     <option value="" disabled selected>Select Role</option>
@@ -280,7 +279,7 @@ const EmployeeManagement = () => {
                     name="reportingManagerId"
                     value={formData.reportingManagerId}
                     onChange={handleInputChange}
-                    className="input mt-1"
+                    className="input mt-1 h-8"
                   >
                     <option value="" disable selected>Select Manager</option>
                     {managers.map((manager) => (
@@ -335,7 +334,7 @@ const EmployeeManagement = () => {
                     name="id"
                     value={formData.id}
                     onChange={handleInputChange}
-                    className="input mt-1"
+                    className="input mt-1 h-8"
                     required
                   />
                 </div>
@@ -349,7 +348,7 @@ const EmployeeManagement = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="input mt-1"
+                    className="input mt-1 h-8"
                     required
                   />
                 </div>
@@ -362,7 +361,7 @@ const EmployeeManagement = () => {
                     name="role"
                     value={formData.role}
                     onChange={handleInputChange}
-                    className="input mt-1"
+                    className="input mt-1 h-8"
                     required
                   >
                     <option value="intern">Intern</option>
@@ -381,7 +380,7 @@ const EmployeeManagement = () => {
                     name="reportingManagerId"
                     value={formData.reportingManagerId}
                     onChange={handleInputChange}
-                    className="input mt-1"
+                    className="input mt-1 h-8"
                   >
                     <option value="">Select Manager</option>
                     {managers.map((manager) => (

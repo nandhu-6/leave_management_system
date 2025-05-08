@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import {register} from '../services/authService';
 
 
 const Register = () => {
@@ -24,10 +25,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:7000/auth/register', {
-        id : employeeId,
-        password : password
-      })
+      await register(employeeId, password);
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to register');

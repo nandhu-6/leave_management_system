@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -32,18 +31,13 @@ const LeaveManagement = () => {
       let filteredLeaves = data.filter(leave => ['pending', 'forwarded','approved'].includes(leave.status.toLowerCase()));
       //filter this filteredLeaves based on start date which should not be greater than current date and can be 2 days before today
       const currentDate = new Date();
-      console.log("currentDate", currentDate);
-      
-      // const twoDaysBeforeToday = new Date(currentDate.getTime() - 2 * 24 * 60 * 60 * 1000);
-      // console.log("twoDaysBeforeToday", twoDaysBeforeToday);
-
-      // filteredLeaves = filteredLeaves.filter(leave => leave.startDate >= twoDaysBeforeToday);
+      currentDate.setHours(0,0,0,0); // to include today's date
+      // console.log("currentDate", currentDate);
       filteredLeaves = filteredLeaves.filter(leave => {
         const leaveDate = new Date(leave.startDate);
         return leaveDate >= currentDate;
       });
       
-      // //sort this filteredLeaves based on start date in ascending order
       filteredLeaves.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
       
       // setLeaves(response.data);
@@ -236,12 +230,12 @@ const LeaveManagement = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                  <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className="input mt-1" required />
+                  <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className="input mt-1 h-8" required />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">End Date</label>
-                  <input type="date" name="endDate" value={formData.endDate} onChange={handleInputChange} className="input mt-1" required />
+                  <input type="date" name="endDate" value={formData.endDate} onChange={handleInputChange} className="input mt-1 h-8" required />
                 </div>
 
                 <div>

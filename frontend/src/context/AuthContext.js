@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import {loginService} from '../services/authService';
+import { getProfile } from '../services/employeeService';
+
 
 const AuthContext = createContext(null);
 
@@ -8,7 +11,10 @@ export const useAuth = () => {
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
+  console.log("context",context);
+  
   return context;
+
 };
 
 export const AuthProvider = ({ children }) => {
@@ -21,15 +27,8 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const response = await axios.get('http://localhost:7000/employees/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setEmployee(response.data);
-      }
+      const data = await getProfile();
+      setEmployee(data);
     } catch (err) {
       localStorage.removeItem('token');
     } finally {
@@ -39,11 +38,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (id, password) => {
     try {
-      const response = await axios.post('http://localhost:7000/auth/login', {
-        id,
-        password
-      });
-      const { token, employee } = response.data;
+      const data = await loginService(id, password);
+      const { token, employee } = data;
       localStorage.setItem('token', token);
       setEmployee(employee);
       return employee;
