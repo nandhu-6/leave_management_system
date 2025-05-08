@@ -21,12 +21,14 @@ const Dashboard = () => {
           getLeaveBalance(),
           getMyLeaves()
         ]);
+      const sortedLeaves = leavesData.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
         // console.log("balanceData",balanceData);
         // console.log("leavedata", leavesData);
 
 
         setLeaveBalance(balanceData);
-        setRecentLeaves(leavesData); // Get last 5 leaves
+        setRecentLeaves(sortedLeaves); // Get last 5 leaves
       } catch (err) {
         setError('Failed to fetch dashboard data');
       } finally {

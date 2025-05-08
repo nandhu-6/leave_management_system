@@ -102,7 +102,17 @@ const applyLeave = async (req, res) => {
             await employeeRepo.save(employee);
 
 
-        } else {
+        }
+        //if role is hr auto approve all type of leaves(casual/sick/lop) leaves
+        else if (employee.role === Role.HR) {
+            status = LeaveStatus.APPROVED;
+            employee.casualLeaveBalance -= leaveDuration;
+            employee.sickLeaveBalance -= leaveDuration;
+            employee.lopCount += leaveDuration;
+            await employeeRepo.save(employee);
+        }
+
+         else {
             // Build the complete approval chain upfront
             const seenApprovers = new Set();
             let approver = await getNextApprover(employee, leaveDuration, null);
@@ -341,7 +351,7 @@ const cancelLeave = async (req, res) => {
             await employeeRepository.save(employee);
 
         }
-        
+
         leave.status = LeaveStatus.CANCELLED;
         leave.currentApproverId = null;
         

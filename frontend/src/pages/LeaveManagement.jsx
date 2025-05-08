@@ -34,13 +34,13 @@ const LeaveManagement = () => {
       const currentDate = new Date();
       console.log("currentDate", currentDate);
       
-      const twoDaysBeforeToday = new Date(currentDate.getTime() - 2 * 24 * 60 * 60 * 1000);
-      console.log("twoDaysBeforeToday", twoDaysBeforeToday);
+      // const twoDaysBeforeToday = new Date(currentDate.getTime() - 2 * 24 * 60 * 60 * 1000);
+      // console.log("twoDaysBeforeToday", twoDaysBeforeToday);
 
       // filteredLeaves = filteredLeaves.filter(leave => leave.startDate >= twoDaysBeforeToday);
       filteredLeaves = filteredLeaves.filter(leave => {
         const leaveDate = new Date(leave.startDate);
-        return leaveDate >= twoDaysBeforeToday;
+        return leaveDate >= currentDate;
       });
       
       // //sort this filteredLeaves based on start date in ascending order
