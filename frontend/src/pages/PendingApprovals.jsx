@@ -87,7 +87,7 @@ const PendingApprovals = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className=" bg-gray-100">
       <div className="max-w-7xl mx-auto py-3">
         <div className="px-4 py-4 sm:px-0">
           

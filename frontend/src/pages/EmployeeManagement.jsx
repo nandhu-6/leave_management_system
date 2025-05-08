@@ -28,6 +28,8 @@ const EmployeeManagement = () => {
     try {
       const data = await getAllEmployees();
       setEmployees(data);
+      console.log("employees", employees);
+      
     } catch (err) {
       setError('Failed to fetch employees');
     } finally {
@@ -119,6 +121,7 @@ const EmployeeManagement = () => {
     });
     setShowEditModal(true);
   };
+  const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 
   if (loading) {
     return (
@@ -184,10 +187,10 @@ const EmployeeManagement = () => {
                       {employee.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.role}
+                      {capitalizeFirstLetter(employee.role)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.manager?.name || '-'}
+                      {employee.reportingManager?.name || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button

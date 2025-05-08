@@ -84,7 +84,7 @@ const Layout = ({ children }) => {
               <li key={item.to}>
                 <button
                   className={`flex items-center w-full px-4 py-3 text-left rounded-lg transition-colors duration-150 ${currentPath === item.to
-                    ? 'bg-[#122E44] text-primary-500 font-semibold'
+                    ? 'bg-[#122E44] text-white font-semibold'
                     : 'text-gray-400 hover:bg-[#122E44]'
                     }`}
                   onClick={() => navigate(item.to)}
@@ -99,7 +99,7 @@ const Layout = ({ children }) => {
         <div className="p-6 border-t border-gray-200">
           <button
             onClick={logout}
-            className="w-full btn bg-primary-500 hover:bg-primary-400"
+            className="w-full btn bg-slate-100 hover:bg-slate-50"
           >
             Logout
           </button>

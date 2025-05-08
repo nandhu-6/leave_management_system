@@ -37,13 +37,13 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className=" bg-gray-100 flex flex-col justify-center py-8 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Create your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Register with your employee ID
+          Register with given employee ID
         </p>
       </div>
 
@@ -68,7 +68,7 @@ const Register = () => {
                   required
                   value={employeeId}
                   onChange={(e) => setEmployeeId(e.target.value)}
-                  className="input"
+                  className="input h-8"
                 />
               </div>
             </div>
@@ -85,7 +85,7 @@ const Register = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input"
+                  className="input h-8"
                 />
               </div>
             </div>
@@ -102,7 +102,7 @@ const Register = () => {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="input"
+                  className="input h-8"
                 />
               </div>
             </div>
@@ -111,7 +111,7 @@ const Register = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full btn btn-primary"
+                className="w-full btn  bg-[#0B1D2D] text-white"
               >
                 {loading ? 'Registering...' : 'Register'}
               </button>

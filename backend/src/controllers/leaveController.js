@@ -317,10 +317,31 @@ const cancelLeave = async (req, res) => {
             return res.status(403).json({ message: 'You can only cancel your own leaves' });
         }
 
-        if (leave.status !== LeaveStatus.PENDING && leave.status !== LeaveStatus.FORWARDED) {
-            return res.status(400).json({ message: 'Only pending or forwarded leaves can be cancelled' });
+        if (leave.status !== LeaveStatus.PENDING && leave.status !== LeaveStatus.FORWARDED && leave.status!== LeaveStatus.APPROVED) {
+            return res.status(400).json({ message: 'Only pending or forwarded or approved leaves can be cancelled' });
         }
 
+        if(leave.status === LeaveStatus.APPROVED) {
+            //cancel approved leave and increase the type of leave balance
+            const employeeRepository = AppDataSource.getRepository(Employee);
+            const employee = await employeeRepository.findOne({
+                where: { id: leave.employee.id }
+            });
+            
+            if (leave.type === LeaveType.CASUAL) {
+                employee.casualLeaveBalance += leave.leaveDuration;
+            }
+            if (leave.type === LeaveType.SICK) {
+                employee.sickLeaveBalance += leave.leaveDuration;
+            }
+            else if(leave.type === LeaveType.LOP) {
+                employee.lopCount -= leave.leaveDuration;
+            } 
+            
+            await employeeRepository.save(employee);
+
+        }
+        
         leave.status = LeaveStatus.CANCELLED;
         leave.currentApproverId = null;
         
@@ -385,23 +406,6 @@ const getTeamLeaves = async (req, res) => {
         res.status(500).json({ message: 'Error fetching team leaves', error: error.message });
     }
 };
-
-// Get pending approvals
-// const getPendingApprovals = async (req, res) => {
-//     try {
-//         const leaves = await AppDataSource.getRepository(Leave).find({
-//             where: { 
-//                 currentApproverId: req.user.id,
-//                 status: In([LeaveStatus.PENDING, LeaveStatus.FORWARDED])
-//             },
-//             relations: ['employee'],
-//             order: { createdAt: 'DESC' }
-//         });
-//         res.json(leaves);
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error fetching pending approvals', error: error.message });
-//     }
-// };
 
 const getPendingApprovals = async (req, res) => {
     try {
