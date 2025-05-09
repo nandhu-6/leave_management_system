@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 const {AppDataSource} = require('../config/database');
 const { Employee } = require('../entities/Employee');
-const JWT_SECRET = 'nandhuS_superStrong_secretKey';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Register new employee
 const register = async (req, res) => {

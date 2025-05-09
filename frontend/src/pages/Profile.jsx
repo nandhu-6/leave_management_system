@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { getTeam } from '../services/employeeService';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ONLY_HR, MANAGER_DIRECTOR_HR } from '../constants/constant';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -15,7 +16,7 @@ const Profile = () => {
     const fetchTeamMembers = async () => {
       try {
         // Only fetch team members if user is a manager, director, or HR
-        if (['manager', 'director', 'hr'].includes(user.role)) {
+        if (MANAGER_DIRECTOR_HR.includes(user.role)) {
           const data = await getTeam();
           setTeamMembers(data);
         }
@@ -28,7 +29,8 @@ const Profile = () => {
 
     fetchTeamMembers();
   }, [user.role]);
-
+  console.log("user", user);
+  
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-8">
       <h2 className="text-2xl font-bold mb-6 text-primary-700">My Profile</h2>
@@ -60,7 +62,7 @@ const Profile = () => {
       </div>
 
        {/* Team Members Section */}
-       {['manager', 'director', 'hr'].includes(user.role) && (
+       {MANAGER_DIRECTOR_HR.includes(user.role) && (
         <div className="">
           <h2 className="text-2xl font-bold mt-4 mb-6 text-primary-700">My Team</h2>
           {loading ? (

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import axios from 'axios';
 import { teamLeaves, allLeaves } from '../services/leaveService';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,14 +19,14 @@ const Calendar = () => {
   useEffect(() => {
     const fetchLeaves = async () => {
       try {
-        let responseData = await teamLeaves()  // Assuming the fetch calls are async and return Promises;
+        let responseData = await teamLeaves()
         if(user.role === 'hr'){
            responseData = await allLeaves();
         }
         const leaves = responseData;
         setEvents(
           leaves.map((leave) => ({
-            title: `${leave.employee?.name || user.name} (${leave.type})`,
+            title: `${leave.employee?.name || user.name}`,
             start: leave.startDate,
             end: leave.endDate,
             backgroundColor:

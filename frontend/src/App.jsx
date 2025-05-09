@@ -11,6 +11,7 @@ import PendingApprovals from './pages/PendingApprovals';
 import Profile from './pages/Profile';
 import Calendar from './pages/Calendar';
 import Layout from './components/Layout';
+import { ONLY_HR, MANAGER_DIRECTOR_HR } from './constants/constant';
 
 // Protected Route component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -91,7 +92,7 @@ const App = () => {
           <Route
             path="/pending-approvals"
             element={
-              <ProtectedRoute allowedRoles={['manager', 'director', 'hr']}>
+              <ProtectedRoute allowedRoles={MANAGER_DIRECTOR_HR}>
                 <Layout>
                   <PendingApprovals />
                 </Layout>
@@ -102,7 +103,7 @@ const App = () => {
           <Route
             path="/employees"
             element={
-              <ProtectedRoute allowedRoles={['hr']}>
+              <ProtectedRoute allowedRoles={ONLY_HR}>
                 <Layout>
                   <EmployeeManagement />
                 </Layout>
@@ -113,7 +114,7 @@ const App = () => {
           <Route
             path="/calendar"
             element={
-              <ProtectedRoute allowedRoles={['manager', 'director', 'hr']}>
+              <ProtectedRoute allowedRoles={MANAGER_DIRECTOR_HR}>
                 <Layout>
                   <Calendar />
                 </Layout>

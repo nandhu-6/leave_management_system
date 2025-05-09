@@ -2,6 +2,8 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ONLY_HR, MANAGER_DIRECTOR_HR, ALL_ROLES} from '../constants/constant';
+
 import {
   HomeIcon,
   UserIcon,
@@ -16,37 +18,37 @@ const navItems = [
     label: 'Dashboard',
     to: '/dashboard',
     icon: <HomeIcon className="h-6 w-6" />,
-    roles: ['employee', 'intern', 'manager', 'director', 'hr', 'developer'],
+    roles: ALL_ROLES,
   },
   {
     label: 'My Profile',
     to: '/profile',
     icon: <UserIcon className="h-6 w-6" />,
-    roles: ['employee', 'intern', 'manager', 'director', 'hr', 'developer'],
+    roles: ALL_ROLES,
   },
   {
     label: 'Apply/Cancel Leave',
     to: '/leaves',
     icon: <CalendarDaysIcon className="h-6 w-6" />,
-    roles: ['employee', 'intern', 'manager', 'director', 'hr', 'developer'],
+    roles: ALL_ROLES,
   },
   {
     label: 'Pending Approvals',
     to: '/pending-approvals',
     icon: <InboxIcon className="h-6 w-6" />,
-    roles: ['manager', 'director', 'hr'],
+    roles: MANAGER_DIRECTOR_HR,
   },
   {
     label: 'Manage Employees',
     to: '/employees',
     icon: <UsersIcon className="h-6 w-6" />,
-    roles: ['hr'],
+    roles: ONLY_HR,
   },
   {
     label: 'Calendar',
     to: '/calendar',
     icon: <CalendarIcon className="h-6 w-6" />,
-    roles: ['manager', 'director', 'hr'],
+    roles: MANAGER_DIRECTOR_HR,
   },
 ];
 

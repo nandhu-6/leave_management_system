@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_URL = 'http://localhost:7000/employees';
+const API_URL = `${process.env.REACT_APP_BASE_URL}/employees`;
 
 export const getAllEmployees = async () => {
   const response = await axios.get(`${API_URL}/listEmployees`);

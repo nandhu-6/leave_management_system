@@ -3,6 +3,8 @@ const {In} = require('typeorm');
 
 const {AppDataSource} = require('../config/database');
 const { Employee } = require('../entities/Employee');
+const { ONLY_HR, MANAGER_DIRECTOR_HR } = require('../constants/constant');
+
 
 
 // Get all employees
@@ -142,7 +144,7 @@ const getTeam = async (req, res) => {
 const getManagers = async (req, res) => {
     try {
         const managers = await AppDataSource.getRepository(Employee).find({
-            where: { role: In(['manager', 'director', 'hr']) }
+            where: { role: In(MANAGER_DIRECTOR_HR) }
         });
         console.log(managers);
         

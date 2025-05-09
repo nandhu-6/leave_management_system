@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'nandhuS_superStrong_secretKey';
+require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Authentication middleware
 const authenticate = (req, res, next) => {
