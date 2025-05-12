@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { getLeaveBalance, getMyLeaves } from '../services/leaveService';
 
 const Dashboard = () => {
@@ -9,7 +11,6 @@ const Dashboard = () => {
   const [leaveBalance, setLeaveBalance] = useState(null);
   const [recentLeaves, setRecentLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -29,7 +30,7 @@ const Dashboard = () => {
         setLeaveBalance(balanceData);
         setRecentLeaves(sortedLeaves); // Get last 5 leaves
       } catch (err) {
-        setError('Failed to fetch dashboard data');
+        toast.error(err.response?.data?.message || 'Failed to fetch dashboard data');
       } finally {
         setLoading(false);
       }
@@ -81,11 +82,7 @@ const Dashboard = () => {
     <div className=" bg-gray-100">
 
       <main className="max-w-7xl mx-auto ">
-        {error && (
-          <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
+        
 
         {/* Leave Balance Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

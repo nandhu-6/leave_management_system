@@ -22,7 +22,7 @@ export const updateEmployee = async (id, employeeData) => {
 };
 
 export const deleteEmployee = async (id) => {
-  const response = await axios.delete(`${API_URL}/deleteEmployee//${id}`);
+  const response = await axios.delete(`${API_URL}/deleteEmployee/${id}`);
   return response.data;
 };
 

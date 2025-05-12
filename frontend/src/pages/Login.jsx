@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
   const [employeeId, setEmployeeId] = useState('');
@@ -19,6 +21,7 @@ const Login = () => {
     try {
       const employee = await login(employeeId, password);
       navigate('/dashboard');
+      toast.success('Logged in successfully!')
       
     } catch (err) {
       setError(err.message || 'Failed to login');

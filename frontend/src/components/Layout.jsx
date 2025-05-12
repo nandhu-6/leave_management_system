@@ -48,7 +48,7 @@ const navItems = [
     label: 'Calendar',
     to: '/calendar',
     icon: <CalendarIcon className="h-6 w-6" />,
-    roles: MANAGER_DIRECTOR_HR,
+    roles: ALL_ROLES,
   },
 ];
 

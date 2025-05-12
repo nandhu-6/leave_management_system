@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { teamLeaves, allLeaves } from '../services/leaveService';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { teamLeaves, allLeaves, getMyLeaves } from '../services/leaveService';
 import { useAuth } from '../context/AuthContext';
+import { MANAGER_DIRECTOR_HR } from '../constants/constant';
 
 const leaveColors = {
   casual: 'bg-primary-300',
@@ -15,49 +18,105 @@ const Calendar = () => {
   const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  // Check if user can view team leaves (HR, director, manager)
+  const canViewTeamLeaves = MANAGER_DIRECTOR_HR.includes(user.role);
+  // Default to 'individual' for everyone
+  const [viewMode, setViewMode] = useState('individual');
 
-  useEffect(() => {
-    const fetchLeaves = async () => {
-      try {
-        let responseData = await teamLeaves()
-        if(user.role === 'hr'){
-           responseData = await allLeaves();
-        }
-        const leaves = responseData;
-        setEvents(
-          leaves.map((leave) => ({
-            title: `${leave.employee?.name || user.name}`,
-            start: leave.startDate,
-            end: leave.endDate,
-            backgroundColor:
-              leave.type === 'casual'
-                ? '#38bdf8'
-                : leave.type === 'sick'
+  const fetchTeamLeaves = async () => {
+    try {
+      setLoading(true);
+      let responseData = await teamLeaves();
+      if (user.role === 'hr') {
+        responseData = await allLeaves();
+      }
+      const leaves = responseData.filter((leave) => leave.status === 'approved');
+
+      setEvents(
+        leaves.map((leave) => ({
+          title: `${leave.employee?.name || user.name}`,
+          start: leave.startDate,
+          end: leave.endDate,
+          backgroundColor:
+            leave.type === 'casual'
+              ? '#38bdf8'
+              : leave.type === 'sick'
                 ? '#ef4444'
                 : '#eab308',
-            borderColor: '#fff',
-            extendedProps: {
-              employee: leave.employee?.name || user.name,
-              type: leave.type,
-              reason: leave.reason,
-              status: leave.status,
-            },
-          }))
-        );
-      } catch (err) {
-        setEvents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLeaves();
-    // eslint-disable-next-line
+          borderColor: '#fff',
+          extendedProps: {
+            employee: leave.employee?.name || user.name,
+            type: leave.type,
+            reason: leave.reason,
+            status: leave.status,
+          },
+        }))
+      );
+    } catch (err) {
+      toast.error('Failed to fetch team leaves');
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMyLeaves = async () => {
+    try {
+      setLoading(true);
+      const myLeaves = await getMyLeaves();
+      const leaves = myLeaves.filter((leave) => leave.status === 'approved');
+      setEvents(
+        leaves.map((leave) => ({
+          title: leave.employee?.name || user.name,
+          start: leave.startDate,
+          end: leave.endDate,
+          backgroundColor:
+            leave.type === 'casual'
+              ? '#38bdf8'
+              : leave.type === 'sick'
+                ? '#ef4444'
+                : '#eab308',
+          borderColor: '#fff',
+          extendedProps: {
+            employee: leave.employee?.name || user.name,
+            type: leave.type,
+            reason: leave.reason,
+            status: leave.status,
+          },
+        }))
+      );
+    } catch (err) {
+      setEvents([]);
+      toast.error('Failed to fetch my leaves');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Toggling between team and individual view
+  const toggleViewMode = (mode) => {
+    setViewMode(mode);
+    if(mode === 'individual') {
+      fetchMyLeaves();
+    }
+    else {
+      fetchTeamLeaves();
+    } 
+  };
+
+  useEffect(() => {
+    if(canViewTeamLeaves && viewMode === 'team') {
+      fetchTeamLeaves();
+    }
+    else {
+      fetchMyLeaves();
+    }
   }, []);
 
   const eventContent = (eventInfo) => {
     return (
       <div className="flex flex-col">
-        <span className=" font-semibold text-sm">{eventInfo.event.title}</span>
+        <span className=" font-semibold text-[12px] h-5 text-center">{eventInfo.event.title}</span>
       </div>
     );
   };
@@ -80,26 +139,58 @@ const Calendar = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 max-h-[80vh] overflow-auto">
-      {loading ? (
-        <div className="text-center py-8">Loading calendar...</div>
-      ) : (
-        <FullCalendar
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          events={events}
-          eventContent={eventContent}
-          eventMouseEnter={handleEventMouseEnter}
-          eventMouseLeave={handleEventMouseLeave}
-          height="auto"
-        />
+    <>
+      {/* View Toggle - Only visible for HR, Director, Manager */}
+      {canViewTeamLeaves && (
+        <div className="flex mb-4">
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <button
+              type="button"
+              onClick={() => toggleViewMode('team')}
+              className={`px-4 py-2 text-sm font-medium rounded-l-lg ${viewMode === 'team'
+                ? 'bg-[#2C3E50] text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+                } border border-gray-200`}
+            >
+              Team
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleViewMode('individual')}
+              className={`px-4 py-2 text-sm font-medium rounded-r-lg ${viewMode === 'individual'
+                ? 'bg-[#2C3E50] text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+                } border border-gray-200`}
+            >
+              Individual
+            </button>
+          </div>
+        </div>
       )}
-      <div className="mt-4 flex space-x-4">
-        <span className="flex items-center"><span className="w-4 h-4 rounded bg-primary-300 inline-block mr-2"></span>Casual Leave</span>
-        <span className="flex items-center"><span className="w-4 h-4 rounded bg-danger inline-block mr-2"></span>Sick Leave</span>
-        <span className="flex items-center"><span className="w-4 h-4 rounded bg-warning inline-block mr-2"></span>Loss of Pay</span>
+
+      <div className="bg-white rounded-lg shadow p-4 max-h-[80vh] overflow-auto">
+
+        {loading ? (
+          <div className="text-center py-8">Loading calendar...</div>
+        ) : (
+          <FullCalendar
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            events={events}
+            eventContent={eventContent}
+            eventMouseEnter={handleEventMouseEnter}
+            eventMouseLeave={handleEventMouseLeave}
+            height="380px"
+          />
+        )}
+        <div className="mt-4 flex space-x-4 text-sm">
+          <span className="flex items-center"><span className="w-4 h-4 rounded bg-primary-300 inline-block mr-2"></span>Casual Leave</span>
+          <span className="flex items-center"><span className="w-4 h-4 rounded bg-danger inline-block mr-2"></span>Sick Leave</span>
+          <span className="flex items-center"><span className="w-4 h-4 rounded bg-warning inline-block mr-2"></span>Loss of Pay</span>
+        </div>
       </div>
-    </div>
+    </>
+
   );
 };
 

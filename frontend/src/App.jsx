@@ -114,7 +114,7 @@ const App = () => {
           <Route
             path="/calendar"
             element={
-              <ProtectedRoute allowedRoles={MANAGER_DIRECTOR_HR}>
+              <ProtectedRoute >
                 <Layout>
                   <Calendar />
                 </Layout>

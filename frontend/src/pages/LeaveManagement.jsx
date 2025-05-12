@@ -20,6 +20,12 @@ const LeaveManagement = () => {
   const [leaveBalance, setLeaveBalance] = useState(null);
   const [filter, setFilter] = useState('all');
 
+  const getDateDaysAgo = (days) => {
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    return date.toISOString().split('T')[0];
+  }
+
   useEffect(() => {
     fetchLeaves();
     fetchLeaveBalance();
@@ -230,12 +236,12 @@ const LeaveManagement = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                  <input type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className="input mt-1 h-8" required />
+                  <input type="date" name="startDate" min={getDateDaysAgo(3)} value={formData.startDate} onChange={handleInputChange} className="input mt-1 h-8" required />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">End Date</label>
-                  <input type="date" name="endDate" value={formData.endDate} onChange={handleInputChange} className="input mt-1 h-8" required />
+                  <input type="date" name="endDate" min={formData.startDate} value={formData.endDate} onChange={handleInputChange} className="input mt-1 h-8" required />
                 </div>
 
                 <div>
