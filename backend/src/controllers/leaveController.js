@@ -1,17 +1,51 @@
-const {AppDataSource} = require('../config/database');
+const { AppDataSource } = require('../config/database');
 const { Leave, LeaveType, LeaveStatus } = require('../entities/Leave');
 const { Employee, Role } = require('../entities/Employee');
 const { LessThanOrEqual, MoreThanOrEqual, In } = require('typeorm');
+const { holidays } = require('../../utils/holidays');
 
 // Helper function to calculate leave duration
 const calculateLeaveDuration = (startDate, endDate) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const diffTime = Math.abs(end - start);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    let count = 0;
+    for (let current = new Date(start); current <= end; current.setDate(current.getDate() + 1)) {
+        const isWeekend = current.getDay() === 0 || current.getDay() === 6;
+        const currentDate = current.toISOString().split('T')[0];
+        const isHoliday = holidays.includes(currentDate);
+
+        if (!isWeekend && !isHoliday) {
+            count++;
+        }
+    }
+    //if count is 0 then throw error saying it is holiday
+    if (count === 0) {
+        const error = new Error('The duration that you have applied is holiday');
+        error.type = 'holiday';
+        throw error;
+    }
+    return count;
+    // const diffTime = Math.abs(end - start);
+    // return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 };
+// const calculateLeaveDuration = (startDate, endDate) => {
+//     const start = new Date(startDate);
+//     // console.log(start);//2025-05-16T00:00:00.000Z
+
+//     const end = new Date(endDate);
+//     let count = 0;
+//     for (current = new Date(start); current <= end; current.setDate(current.getDate() + 1)) {
+//         if (current.getDay() !== 0 && current.getDay() !== 6) {
+//             count++;
+//         }
+//     }
+//     return count;
+//     // const diffTime = Math.abs(end - start);
+//     // return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+// };
 
 // Check for overlapping leaves
+
 const checkOverlappingLeaves = async (employeeId, startDate, endDate) => {
     const leaveRepository = AppDataSource.getRepository(Leave);
     const overlappingLeaves = await leaveRepository.find({
@@ -28,18 +62,18 @@ const checkOverlappingLeaves = async (employeeId, startDate, endDate) => {
 // Helper function to determine next approver
 const getNextApprover = async (employee, leaveDuration, currentApprover) => {
     const employeeRepository = AppDataSource.getRepository(Employee);
-    
+
     // If current approver is HR, no next approver needed
     if (currentApprover?.role === Role.HR) {
         return null;
     }
-    
+
     // If current approver is Director, next is HR
     if (currentApprover?.role === Role.DIRECTOR) {
         const hr = await employeeRepository.findOne({ where: { role: Role.HR } });
         return hr;
     }
-    
+
     // If current approver is Manager
     if (currentApprover?.role === Role.MANAGER) {
         // For leaves > 3 days, next is Director
@@ -51,20 +85,20 @@ const getNextApprover = async (employee, leaveDuration, currentApprover) => {
         const hr = await employeeRepository.findOne({ where: { role: Role.HR } });
         return hr;
     }
-    
+
     // For regular employees, first approver is their reporting manager
     if (!currentApprover) {
-        const reportingManager = await employeeRepository.findOne({ 
+        const reportingManager = await employeeRepository.findOne({
             where: { id: employee.reportingManagerId }
         });
-        
+
         if (!reportingManager) {
             throw new Error('Reporting manager not found');
         }
-        
+
         return reportingManager;
     }
-    
+
     return null;
 };
 
@@ -95,7 +129,7 @@ const applyLeave = async (req, res) => {
         let currentApprover = null;
         let approvalChain = [];
 
-        
+
 
         if (type === LeaveType.SICK) {
             status = LeaveStatus.APPROVED;
@@ -118,11 +152,11 @@ const applyLeave = async (req, res) => {
             await employeeRepo.save(employee);
         }
 
-         else {
+        else {
             // Building the complete approval chain upfront
             const seenApprovers = new Set();
             let approver = await getNextApprover(employee, leaveDuration, null);
-            
+
             while (approver && !seenApprovers.has(approver.id)) {
                 approvalChain.push({
                     approverId: approver.id,
@@ -159,6 +193,9 @@ const applyLeave = async (req, res) => {
         await leaveRepo.save(leave);
         res.status(201).json(leave);
     } catch (error) {
+        if (error.type === 'holiday') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({ message: 'Error applying for leave', error: error.message });
     }
 };
@@ -171,7 +208,7 @@ const approveLeave = async (req, res) => {
     try {
         const leaveRepository = AppDataSource.getRepository(Leave);
         const employeeRepository = AppDataSource.getRepository(Employee);
-        
+
         const leave = await leaveRepository.findOne({
             where: { id: leaveId },
             relations: ['employee', 'currentApprover']
@@ -208,7 +245,7 @@ const approveLeave = async (req, res) => {
 
         // Check if this is the final approval (HR or last in chain)
         const isHR = currentApprover.role === Role.HR;
-        const isLastApprover = approvalChain.every(entry => 
+        const isLastApprover = approvalChain.every(entry =>
             entry.approverId === req.user.id || entry.status === LeaveStatus.APPROVED
         );
 
@@ -218,21 +255,21 @@ const approveLeave = async (req, res) => {
             leave.currentApproverId = null;
             leave.forwardedTo = null;
             leave.approvedBy = req.user.id;
-            
+
             // // Update employee leave balance
             // const employee = await employeeRepository.findOne({
             //     where: { id: leave.employee.id }
             // });
-            
+
             // if (leave.type === LeaveType.CASUAL) {
             //     employee.casualLeaveBalance -= leave.leaveDuration;
             // }
             // else if(leave.type === LeaveType.LOP) {
             //     employee.lopCount += leave.leaveDuration;
             // } 
-            
+
             // await employeeRepository.save(employee);
-            
+
             // Add to approval history
             approvalHistory.push({
                 action: 'APPROVED',
@@ -243,13 +280,13 @@ const approveLeave = async (req, res) => {
         } else {
             // Get next approver
             const nextApprover = await getNextApprover(leave.employee, leave.leaveDuration, currentApprover);
-            
+
             if (nextApprover) {
                 // Forward to next approver
                 leave.status = LeaveStatus.FORWARDED;
                 leave.currentApproverId = nextApprover.id;
                 leave.forwardedTo = nextApprover.id;
-                
+
                 // Add to approval history
                 approvalHistory.push({
                     action: 'FORWARDED',
@@ -264,7 +301,7 @@ const approveLeave = async (req, res) => {
         leave.approvalChain = JSON.stringify(approvalChain);
         leave.approvalHistory = JSON.stringify(approvalHistory);
         await leaveRepository.save(leave);
-        
+
         res.json(leave);
     } catch (error) {
         res.status(500).json({ message: 'Error approving leave', error: error.message });
@@ -298,24 +335,24 @@ const rejectLeave = async (req, res) => {
         leave.status = LeaveStatus.REJECTED;
         leave.currentApproverId = null;
 
-          // add back employee's leave balance
+        // add back employee's leave balance
 
         const employee = await employeeRepository.findOne({
             where: { id: leave.employee.id }
         });
-            
+
         if (leave.type === LeaveType.CASUAL) {
             employee.casualLeaveBalance += leave.leaveDuration;
         }
         else if (Leave.type === LeaveType.SICK) {
             employee.sickLeaveBalance += leave.leaveDuration;
         }
-        else if(leave.type === LeaveType.LOP) {
+        else if (leave.type === LeaveType.LOP) {
             employee.lopCount -= leave.leaveDuration;
-        } 
-            
+        }
+
         await employeeRepository.save(employee);
-        
+
         const approvalHistory = JSON.parse(leave.approvalHistory || '[]');
         approvalHistory.push({
             action: 'REJECTED',
@@ -354,7 +391,7 @@ const cancelLeave = async (req, res) => {
             return res.status(403).json({ message: 'You can only cancel your own leaves' });
         }
 
-        if (leave.status !== LeaveStatus.PENDING && leave.status !== LeaveStatus.FORWARDED && leave.status!== LeaveStatus.APPROVED) {
+        if (leave.status !== LeaveStatus.PENDING && leave.status !== LeaveStatus.FORWARDED && leave.status !== LeaveStatus.APPROVED) {
             return res.status(400).json({ message: 'Only pending or forwarded or approved leaves can be cancelled' });
         }
 
@@ -364,7 +401,7 @@ const cancelLeave = async (req, res) => {
         //     const employee = await employeeRepository.findOne({
         //         where: { id: leave.employee.id }
         //     });
-            
+
         //     if (leave.type === LeaveType.CASUAL) {
         //         employee.casualLeaveBalance += leave.leaveDuration;
         //     }
@@ -374,7 +411,7 @@ const cancelLeave = async (req, res) => {
         //     else if(leave.type === LeaveType.LOP) {
         //         employee.lopCount -= leave.leaveDuration;
         //     } 
-            
+
         //     await employeeRepository.save(employee);
 
         // }
@@ -383,16 +420,16 @@ const cancelLeave = async (req, res) => {
         })
         if (leave.type === LeaveType.CASUAL) {
             employee.casualLeaveBalance += leave.leaveDuration;
-        }else if (leave.type === LeaveType.SICK) {
+        } else if (leave.type === LeaveType.SICK) {
             employee.sickLeaveBalance += leave.leaveDuration;
-        }else if(leave.type === LeaveType.LOP) {
+        } else if (leave.type === LeaveType.LOP) {
             employee.lopCount -= leave.leaveDuration;
         }
         await employeeRepository.save(employee);
 
         leave.status = LeaveStatus.CANCELLED;
         leave.currentApproverId = null;
-        
+
         const approvalHistory = JSON.parse(leave.approvalHistory || '[]');
         approvalHistory.push({
             action: 'CANCELLED',
@@ -426,7 +463,7 @@ const getMyLeaves = async (req, res) => {
 // Get leave balance
 const getLeaveBalance = async (req, res) => {
     try {
-        const employee = await AppDataSource.getRepository(Employee).findOne({ 
+        const employee = await AppDataSource.getRepository(Employee).findOne({
             where: { id: req.user.id }
         });
         res.json({
@@ -443,7 +480,7 @@ const getLeaveBalance = async (req, res) => {
 const getTeamLeaves = async (req, res) => {
     try {
         const leaves = await AppDataSource.getRepository(Leave).find({
-            where: { 
+            where: {
                 employee: { reportingManagerId: req.user.id }
             },
             relations: ['employee'],
@@ -512,9 +549,9 @@ const getLeaveStatus = async (req, res) => {
         }
 
         // Check authorization
-        if (leave.employeeId !== req.user.id && 
-            leave.currentApproverId !== req.user.id && 
-            req.user.role !== Role.HR && 
+        if (leave.employeeId !== req.user.id &&
+            leave.currentApproverId !== req.user.id &&
+            req.user.role !== Role.HR &&
             req.user.role !== Role.DIRECTOR) {
             return res.status(403).json({ message: 'You are not authorized to view this leave' });
         }
@@ -530,6 +567,15 @@ const getLeaveStatus = async (req, res) => {
     }
 };
 
+const getHolidays = async (req, res) => {
+    try {
+        res.send({ holidays });
+    }
+    catch(error) {
+        res.status(500).json({ message: 'Error fetching holidays', error: error.message });
+    }
+}
+
 module.exports = {
     applyLeave,
     getMyLeaves,
@@ -540,5 +586,6 @@ module.exports = {
     rejectLeave,
     cancelLeave,
     getAllLeaves,
-    getLeaveStatus
+    getLeaveStatus,
+    getHolidays
 };

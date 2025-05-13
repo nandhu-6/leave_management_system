@@ -42,3 +42,8 @@ export const allLeaves = async() => {
   const response = await axios.get(`${API_URL}/all`);
   return response.data;
 }
+
+export const getHolidays = async()=> {
+  const response = await axios.get(`${API_URL}/holidays`);
+  return response.data;
+}

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {applyLeave, getMyLeaves, getLeaveBalance,cancelLeave, getLeaveStatus, getTeamLeaves, getPendingApprovals, approveLeave,rejectLeave, getAllLeaves} = require('../controllers/leaveController');
+const {applyLeave, getMyLeaves, getLeaveBalance,cancelLeave, getLeaveStatus, getTeamLeaves, getPendingApprovals, approveLeave,rejectLeave, getAllLeaves, getHolidays} = require('../controllers/leaveController');
 const { ONLY_HR, MANAGER_DIRECTOR_HR } = require('../constants/constant');
 const {authorize } = require('../middleware/auth');
 
@@ -10,6 +10,7 @@ router.get('/my-leaves', getMyLeaves); //
 router.get('/balance',  getLeaveBalance); //
 router.post('/:leaveId/cancel', cancelLeave); //
 router.get('/status/:leaveId', getLeaveStatus) //
+router.get('/holidays', getHolidays); //
 
 // Manager, Director, and HR routes
 router.get('/team-leaves', authorize(MANAGER_DIRECTOR_HR),getTeamLeaves); //
