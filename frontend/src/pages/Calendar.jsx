@@ -35,7 +35,7 @@ const Calendar = () => {
         start: holiday,
         end: holiday,
         display: 'background',
-        backgroundColor: '#10b981',
+        backgroundColor: '#22c55e',
         borderColor: 'transparent',
         extendedProps: {
           type: 'holiday',
