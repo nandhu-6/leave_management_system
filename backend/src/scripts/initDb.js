@@ -2,6 +2,9 @@ require('dotenv').config();
 const {AppDataSource} = require("../config/database");
 const { Employee, Role } = require("../entities/Employee");
 
+console.log("🔑 DB_PASSWORD:", process.env.DB_PASSWORD);
+console.log("🔑 DB_user:", process.env.DB_HOST);
+
 const initializeDatabase = async () => {
     try {
         // Initialize database connection
