@@ -1,3 +1,4 @@
+require('dotenv').config();
 const {AppDataSource} = require("../config/database");
 const { Employee, Role } = require("../entities/Employee");
 
