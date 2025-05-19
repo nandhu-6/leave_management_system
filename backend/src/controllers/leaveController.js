@@ -3,6 +3,7 @@ const { Leave, LeaveType, LeaveStatus } = require('../entities/Leave');
 const { Employee, Role } = require('../entities/Employee');
 const { LessThanOrEqual, MoreThanOrEqual, In } = require('typeorm');
 const { holidays } = require('../../utils/holidays');
+const logger = require('../../utils/logger');
 
 // Helper function to calculate leave duration
 const calculateLeaveDuration = (startDate, endDate) => {
@@ -21,6 +22,7 @@ const calculateLeaveDuration = (startDate, endDate) => {
     //if count is 0 then throw error saying it is holiday
     if (count === 0) {
         const error = new Error('The duration that you have applied is holiday');
+        logger.error(error);
         error.type = 'holiday';
         throw error;
     }
@@ -110,6 +112,7 @@ const applyLeave = async (req, res) => {
         const hasOverlappingLeaves = await checkOverlappingLeaves(req.user.id, startDate, endDate);
         if (hasOverlappingLeaves) {
             return res.status(400).json({ message: "You have already applied for a leave during this period. Please select another date." });
+            logger.info("You have already applied for a leave during this period. Please select another date.");
         }
 
         const employeeRepo = AppDataSource.getRepository(Employee);
@@ -120,9 +123,11 @@ const applyLeave = async (req, res) => {
         // Checking leave balance
         if (type === LeaveType.CASUAL && employee.casualLeaveBalance < leaveDuration) {
             return res.status(400).json({ message: "Insufficient casual leave balance" });
+            logger.info("Insufficient casual leave balance");
         }
         if (type === LeaveType.SICK && employee.sickLeaveBalance < leaveDuration) {
             return res.status(400).json({ message: "Insufficient sick leave balance" });
+            logger.info("Insufficient sick leave balance");
         }
 
         let status = LeaveStatus.PENDING;
@@ -197,7 +202,8 @@ const applyLeave = async (req, res) => {
             return res.status(400).json({ message: error.message });
         }
         res.status(500).json({ message: 'Error applying for leave', error: error.message });
-    }
+        logger.error('Error applying for leave', error);
+};
 };
 
 // Approve leave
@@ -216,6 +222,7 @@ const approveLeave = async (req, res) => {
 
         if (!leave) {
             return res.status(404).json({ message: 'Leave not found' });
+            logger.info('Leave not found');
         }
 
         const isCurrentApprover = leave.currentApproverId === req.user.id;
@@ -223,6 +230,7 @@ const approveLeave = async (req, res) => {
 
         if (!isCurrentApprover && !isForwardedToUser) {
             return res.status(403).json({ message: 'You are not authorized to approve this leave' });
+            logger.info('You are not authorized to approve this leave');
         }
 
         // Get current approver's role
@@ -305,6 +313,7 @@ const approveLeave = async (req, res) => {
         res.json(leave);
     } catch (error) {
         res.status(500).json({ message: 'Error approving leave', error: error.message });
+        logger.error('Error approving leave', error);
     }
 };
 
@@ -323,6 +332,7 @@ const rejectLeave = async (req, res) => {
 
         if (!leave) {
             return res.status(404).json({ message: 'Leave not found' });
+            logger.info('Leave not found');
         }
 
         const isCurrentApprover = leave.currentApproverId === req.user.id;
@@ -330,6 +340,7 @@ const rejectLeave = async (req, res) => {
 
         if (!isCurrentApprover && !isForwardedToUser) {
             return res.status(403).json({ message: 'You are not authorized to approve this leave' });
+            logger.info('You are not authorized to approve this leave');
         }
 
         leave.status = LeaveStatus.REJECTED;
@@ -366,6 +377,7 @@ const rejectLeave = async (req, res) => {
         res.json(leave);
     } catch (error) {
         res.status(500).json({ message: 'Error rejecting leave', error: error.message });
+        logger.error('Error rejecting leave', error);
     }
 };
 
@@ -385,14 +397,17 @@ const cancelLeave = async (req, res) => {
 
         if (!leave) {
             return res.status(404).json({ message: 'Leave not found' });
+            logger.info('Leave not found');
         }
 
         if (leave.employee.id !== req.user.id) {
             return res.status(403).json({ message: 'You can only cancel your own leaves' });
+            logger.info('You can only cancel your own leaves');
         }
 
         if (leave.status !== LeaveStatus.PENDING && leave.status !== LeaveStatus.FORWARDED && leave.status !== LeaveStatus.APPROVED) {
             return res.status(400).json({ message: 'Only pending or forwarded or approved leaves can be cancelled' });
+            logger.info('Only pending or forwarded or approved leaves can be cancelled');
         }
 
         // if(leave.status === LeaveStatus.APPROVED) {
@@ -443,6 +458,7 @@ const cancelLeave = async (req, res) => {
         res.json(leave);
     } catch (error) {
         res.status(500).json({ message: 'Error cancelling leave', error: error.message });
+        logger.error('Error cancelling leave', error);
     }
 };
 
@@ -457,6 +473,7 @@ const getMyLeaves = async (req, res) => {
         res.json(leaves);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching leaves', error: error.message });
+        logger.error('Error fetching leaves', error);
     }
 };
 
@@ -473,6 +490,7 @@ const getLeaveBalance = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching leave balance', error: error.message });
+        logger.error('Error fetching leave balance', error);
     }
 };
 
@@ -489,6 +507,7 @@ const getTeamLeaves = async (req, res) => {
         res.json(leaves);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching team leaves', error: error.message });
+        logger.error('Error fetching team leaves', error);
     }
 };
 
@@ -513,6 +532,7 @@ const getPendingApprovals = async (req, res) => {
         res.json(leaves);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching pending approvals', error: error.message });
+        logger.error('Error fetching pending approvals', error);
     }
 };
 
@@ -522,6 +542,7 @@ const getAllLeaves = async (req, res) => {
     try {
         if (req.user.role !== Role.HR && req.user.role !== Role.DIRECTOR) {
             return res.status(403).json({ message: 'Only HR and Director can view all leaves' });
+            logger.info('Only HR and Director can view all leaves');
         }
 
         const leaves = await AppDataSource.getRepository(Leave).find({
@@ -531,6 +552,7 @@ const getAllLeaves = async (req, res) => {
         res.json(leaves);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching leaves', error: error.message });
+        logger.error('Error fetching leaves', error);
     }
 };
 
@@ -546,6 +568,7 @@ const getLeaveStatus = async (req, res) => {
 
         if (!leave) {
             return res.status(404).json({ message: 'Leave not found' });
+            logger.info('Leave not found');
         }
 
         // Check authorization
@@ -554,6 +577,7 @@ const getLeaveStatus = async (req, res) => {
             req.user.role !== Role.HR &&
             req.user.role !== Role.DIRECTOR) {
             return res.status(403).json({ message: 'You are not authorized to view this leave' });
+            logger.info('You are not authorized to view this leave');
         }
 
         // Parse JSON strings for client
@@ -564,6 +588,7 @@ const getLeaveStatus = async (req, res) => {
         res.json(leave.status);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching leave status', error: error.message });
+        logger.error('Error fetching leave status', error);
     }
 };
 
@@ -573,6 +598,7 @@ const getHolidays = async (req, res) => {
     }
     catch(error) {
         res.status(500).json({ message: 'Error fetching holidays', error: error.message });
+        logger.error('Error fetching holidays', error);
     }
 }
 

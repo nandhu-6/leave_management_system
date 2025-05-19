@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const leaveRoutes = require('./routes/leaveRoutes');
 const {authenticate} = require('./middleware/auth');
+const logger = require('../utils/logger')
 
 const app = express();
 
@@ -21,18 +22,21 @@ app.use('/leaves',authenticate, leaveRoutes);
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Something went wrong!' });
+    logger.error("Internal server error", err);
+
 });
 // Initialize database connection
 AppDataSource.initialize()
     .then(() => {
-        console.log('Database connection established');
+        logger.info("Database connection established");
     })
     .catch((error) => {
-        console.error('Error connecting to database:', error);
+        logger.error("Error connecting to database", error);
     });
 
 const PORT = process.env.PORT || 7000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    // console.log(`Server is running on port ${PORT}`);
+    logger.info("Server started on port", PORT);
 }); 
 

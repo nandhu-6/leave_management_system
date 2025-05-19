@@ -4,6 +4,7 @@ require('dotenv').config();
 const {AppDataSource} = require('../config/database');
 const { Employee } = require('../entities/Employee');
 const JWT_SECRET = process.env.JWT_SECRET;
+const logger = require('../../utils/logger');
 
 // Register new employee
 const register = async (req, res) => {
@@ -16,10 +17,12 @@ const register = async (req, res) => {
         });
 
         if(!employee){
+            logger.error(`Employee with id ${id} already exists`);
             return res.status(404).json({ message: 'Employee record not found, Contact HR' });
         }
 
         if(employee.password){
+            logger.warn(`Employee with id ${id} already registered`);
             return res.status(400).json({ message: 'Employee already registered, Please Login' });
         }
 
@@ -28,8 +31,10 @@ const register = async (req, res) => {
         employee.password = hashedPassword;
 
         await AppDataSource.getRepository(Employee).save(employee);
+        logger.info(`Employee with id ${id} registered successfully`);
         res.status(200).json({ message: 'Employee registered successfully' });
     } catch (error) {
+        logger.error(`Error registering employee: ${error.message}`);
         res.status(500).json({ message: 'Error registering employee', error: error.message });
     }
 };
@@ -45,12 +50,14 @@ const login = async (req, res) => {
         });
 
         if (!employee) {
+            logger.error(`Employee with id ${id} not found`);
             return res.status(404).json({ message: 'Employee not found' });
         }
 
         // Check password
         const isPasswordValid = await bcrypt.compare(password, employee.password);
         if (!isPasswordValid) {
+            logger.error(`Invalid password for employee with id ${id}`);
             return res.status(401).json({ message: 'Invalid password' });
         }
 
@@ -69,7 +76,9 @@ const login = async (req, res) => {
                 role: employee.role
             }
         });
+        logger.info(`Employee with id ${id} logged in successfully`);
     } catch (error) {
+        logger.error(`Error logging in employee: ${error.message}`);
         res.status(500).json({ message: 'Error logging in', error: error.message });
     }
 };
