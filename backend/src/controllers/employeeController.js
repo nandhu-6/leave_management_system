@@ -195,6 +195,28 @@ const deleteEmployee = async (req, res) => {
     }
 };
 
+const getUserById = async (req, res) => {
+    try {
+        const { id } = req.params; // Extract the id parameter from req.params
+        logger.info(`Fetching user with id: ${id}`);
+        
+        const user = await AppDataSource.getRepository(Employee).findOne({
+            where: { id: id }
+        });
+        
+        if (!user) {
+            logger.error(`User with id ${id} not found`);
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        res.json(user.name);
+    }
+    catch (error) {
+        logger.error(`Error fetching user by id: ${error.message}`);
+        res.status(500).json({ message: 'Error fetching user', error: error.message });
+    }
+};
+
 module.exports = {
     getAllEmployees,
     createEmployee,
@@ -203,5 +225,6 @@ module.exports = {
     getReportingManager,
     getTeam,
     getManagers,
-    deleteEmployee
+    deleteEmployee,
+    getUserById
 }; 

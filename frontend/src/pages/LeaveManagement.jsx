@@ -4,6 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getMyLeaves, getLeaveBalance, applyLeave, cancelLeave } from '../services/leaveService';
+import { getUserById } from '../services/employeeService';
+import {
+  InformationCircleIcon
+} from '@heroicons/react/24/outline';
+
+
 
 const LeaveManagement = () => {
   const { user } = useAuth();
@@ -19,6 +25,9 @@ const LeaveManagement = () => {
   });
   const [leaveBalance, setLeaveBalance] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState(null);
+  
 
   const getDateDaysAgo = (days) => {
     const date = new Date();
@@ -34,22 +43,22 @@ const LeaveManagement = () => {
   const fetchLeaves = async () => {
     try {
       const data = await getMyLeaves();
-      let filteredLeaves = data.filter(leave => ['pending', 'forwarded','approved'].includes(leave.status.toLowerCase()));
+      let filteredLeaves = data.filter(leave => ['pending', 'forwarded', 'approved'].includes(leave.status.toLowerCase()));
       //filter this filteredLeaves based on start date which should not be greater than current date and can be 2 days before today
       const currentDate = new Date();
-      currentDate.setHours(0,0,0,0); // to include today's date
+      currentDate.setHours(0, 0, 0, 0); // to include today's date
       // console.log("currentDate", currentDate);
       filteredLeaves = filteredLeaves.filter(leave => {
         const leaveDate = new Date(leave.startDate);
         return leaveDate >= currentDate;
       });
-      
+
       filteredLeaves.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-      
+
       // setLeaves(response.data);
       setLeaves(filteredLeaves);
-      console.log(filteredLeaves);
-      
+      // console.log(filteredLeaves);
+
       // setLeaves(response.data);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to fetch leaves');
@@ -130,7 +139,49 @@ const LeaveManagement = () => {
     }
   };
 
+  const openModal = async (leaveInfo) => {
+    try {
+      const parsedLeaveInfo = JSON.parse(leaveInfo.approvalHistory);
+      
+      const historyWithNames = [...parsedLeaveInfo];
+      
+      setSelectedHistory(historyWithNames);
+      setIsModalOpen(true);
+      
+      const updatedHistory = await Promise.all(
+        historyWithNames.map(async (entry) => {
+          try {
+            // console.log(`Fetching data for employee ID: ${entry.by}`);
+            const userName = await getUserById(entry.by);
+            // console.log(`Received user data:`, userName);
+            
+            return {
+              ...entry,
+              employeeName: userName && userName ? userName : entry.by
+            };
+          } catch (err) {
+            console.error(`Error fetching employee ${entry.by}:`, err);
+            return entry;
+          }
+        })
+      );
+      
+      // Update the history with employee names
+      setSelectedHistory(updatedHistory);
+      console.log("modal data with names", updatedHistory);
+      
+    } catch (error) {
+      console.log(error.message);
+      toast.error("Error parsing approval leave history");
+    }
+  }
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedHistory([]);
+  }
+
   const filteredLeaves = leaves.filter(leave => filter === 'all' || leave.status.toLowerCase() === filter);
+  // console.log("leaves", filteredLeaves);
 
   if (loading) {
     return (
@@ -173,48 +224,51 @@ const LeaveManagement = () => {
           {
             filteredLeaves.length > 0 ? (
               <div className="bg-white shadow max-h-[75vh] overflow-y-auto sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {filteredLeaves.map((leave) => (
-                <li key={leave.id}>
-                  <div className="px-4 py-4 sm:px-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <p className="text-sm font-medium text-primary-600 truncate">
-                          {leave.type} Leave
-                        </p>
-                        <span className={`ml-2 badge ${getStatusBadgeClass(leave.status)}`}>
-                          {leave.status}
-                        </span>
+                <ul className="divide-y divide-gray-200">
+                  {filteredLeaves.map((leave) => (
+                    <li key={leave.id}>
+                      <div className="px-4 py-4 sm:px-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <p className="text-sm font-medium text-primary-600 truncate">
+                              {leave.type} Leave
+                            </p>
+                            <span className={`ml-2 badge ${getStatusBadgeClass(leave.status)}`}>
+                              {leave.status}
+                            </span>
+                          </div>
+                          <div className="ml-2 flex-shrink-0 flex">
+                            <button onClick={() => handleCancel(leave.id)} className="btn btn-danger text-sm">
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                        <div className="mt-2 sm:flex sm:justify-between">
+                          <div className="sm:flex">
+                            <p className="flex items-center text-sm text-gray-500">
+                              {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p>Applied on {new Date(leave.createdAt).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="mt-2 flex justify-between">
+                          <p className="text-sm text-gray-500">
+                            Reason: {leave.reason}
+                          </p>
+                          <button onClick={() => openModal(leave)}>
+                            <InformationCircleIcon className="w-5 h-5 mr-2 text-blue-500 hover:text-blue-600 cursor-pointer" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="ml-2 flex-shrink-0 flex">
-                        <button onClick={() => handleCancel(leave.id)} className="btn btn-danger text-sm">
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                    <div className="mt-2 sm:flex sm:justify-between">
-                      <div className="sm:flex">
-                        <p className="flex items-center text-sm text-gray-500">
-                          {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                        <p>Applied on {new Date(leave.createdAt).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Reason: {leave.reason}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : (<p className='text-center'>No leaves found to cancel</p>)
           }
-          
+
         </div>
       </div>
 
@@ -258,6 +312,39 @@ const LeaveManagement = () => {
           </div>
         </div>
       )}
+
+      {/* leaveInfo modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-md">
+            <h2 className="text-lg text-primary-600 font-semibold mb-4">Approval History</h2>
+            {selectedHistory.length === 0 ? (
+              <p>No approval history available.</p>
+            ) : (
+              <ul className="space-y-2 max-h-64 overflow-y-auto">
+                {selectedHistory.map((entry, idx) => (
+                  <li key={idx} className="border-b pb-2">
+                    <p><strong>Action:</strong> {entry.action}</p>
+                    <p><strong>By:</strong> {entry.employeeName || entry.by}</p>
+                    {entry.comment && <p><strong>Comment:</strong> {entry.comment}</p>}
+                    <p><strong>Time:</strong> {new Date(entry.timestamp).toLocaleString()}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-4 text-right">
+              <button
+                className="px-4 py-2 btn btn-primary text-white rounded "
+                onClick={closeModal}
+                
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

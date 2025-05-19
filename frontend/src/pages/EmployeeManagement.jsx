@@ -28,7 +28,7 @@ const EmployeeManagement = () => {
     try {
       const data = await getAllEmployees();
       setEmployees(data);
-      console.log("employees", employees);
+      console.log("employees", data);
       
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to fetch employees');

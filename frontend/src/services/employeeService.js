@@ -42,3 +42,8 @@ export const getTeam = async() => {
   const response = await axios.get(`${API_URL}/team`);
   return response.data;
 }
+
+export const getUserById = async (id) => {
+  const response = await axios.get(`${API_URL}/userById/${id}`);
+  return response.data;
+}
