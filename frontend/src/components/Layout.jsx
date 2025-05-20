@@ -58,7 +58,7 @@ const navItems = [
 const pageTitles = {
   '/dashboard': 'Dashboard',
   '/profile': 'Profile',
-  '/leaves': 'Apply/Cancel Leave',
+  '/leaves': 'Apply Leave',
   '/pending-approvals': 'Pending Approvals',
   '/employees': 'Manage Employees',
   '/calendar': 'Team Calendar',
@@ -158,11 +158,12 @@ const Layout = ({ children }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="h-16 bg-[#5141a1] shadow flex justify-between items-center px-8 sticky top-0 z-10 relative">
-          <h1 className="text-2xl font-bold text-white">{pageTitle}</h1>
+        <header className="min-h-12 sm:min-h-16 bg-[#5141a1] shadow flex flex-wrap justify-between items-center px-4 sm:px-8 sticky top-0 z-10 relative">
+        {/* <header className="h-8 sm:h-16  bg-[#5141a1] shadow flex justify-between items-center px-8 sticky top-0 z-10 relative"> */}
+          <h1 className="text-sm sm:text-2xl font-bold text-white">{pageTitle}</h1>
           <div ref={dropdownRef}>
             <button className='relative' onClick={handleShow}>
-              <span className="flex items-center font-semibold text-white space-x-1">
+              <span className="flex items-center font-semibold text-white space-x-1 text-sm sm:text-2xl">
                 <UserIcon className="w-4 h-4" />
                 <span>{user.name}</span>
               </span>
@@ -188,7 +189,7 @@ const Layout = ({ children }) => {
 
 
         </header>
-        <main className="flex-1 p-8">{children}</main>
+        <main className="flex-1 p-2 sm:p-8">{children}</main>
       </div>
     </div>
   );

@@ -28,7 +28,7 @@
   }
   
   .card {
-    @apply bg-white shadow rounded-lg p-6;
+    @apply bg-white shadow rounded-lg p-4 sm:p-6;
   }
   
   .badge {

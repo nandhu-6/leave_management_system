@@ -197,25 +197,27 @@ const LeaveManagement = () => {
   }
 
   return (
-    <div className=" bg-gray-100">
-      <div className="max-w-7xl mx-auto ">
-        <div className="px-4 py-4 sm:px-0">
-          <div className="flex justify-between items-center mb-6">
+    <div className="bg-gray-100 min-h-screen w-full">
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="px-2 py-3 sm:px-6 sm:py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 sm:mb-6">
             {/* Filter Dropdown */}
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="input max-w-fit px-1 h-10"
+              className="input w-full sm:w-auto px-2 py-1 h-10 text-sm"
+              style={{ maxWidth: '100%' }}
             >
-              <option value="all">status</option>
+              <option value="all">All Status</option>
               <option value="pending">Pending</option>
               <option value="forwarded">Forwarded</option>
             </select>
-            <button onClick={() => setShowApplyForm(true)} className="btn btn-primary">
+            <button 
+              onClick={() => setShowApplyForm(true)} 
+              className="btn btn-primary w-full sm:w-auto text-sm py-1 px-3"
+            >
               Apply for Leave
             </button>
-
-
           </div>
 
 
@@ -223,42 +225,51 @@ const LeaveManagement = () => {
           {/* Leave List */}
           {
             filteredLeaves.length > 0 ? (
-              <div className="bg-white shadow max-h-[75vh] overflow-y-auto sm:rounded-md">
-                <ul className="divide-y divide-gray-200">
+              <div className="bg-white shadow max-h-[75vh] overflow-y-auto rounded-md w-full">
+                <ul className="divide-y divide-gray-200 w-full">
                   {filteredLeaves.map((leave) => (
-                    <li key={leave.id}>
-                      <div className="px-4 py-4 sm:px-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <p className="text-sm font-medium text-primary-600 truncate">
+                    <li key={leave.id} className="w-full">
+                      <div className="px-3 py-3 sm:px-4 sm:py-4 w-full">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 w-full">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-xs sm:text-sm font-medium text-primary-600">
                               {leave.type} Leave
                             </p>
-                            <span className={`ml-2 badge ${getStatusBadgeClass(leave.status)}`}>
+                            <span className={`badge ${getStatusBadgeClass(leave.status)}`}>
                               {leave.status}
                             </span>
                           </div>
-                          <div className="ml-2 flex-shrink-0 flex">
-                            <button onClick={() => handleCancel(leave.id)} className="btn btn-danger text-sm">
+                          <div className="flex-shrink-0 mt-2 sm:mt-0">
+                            <button 
+                              onClick={() => handleCancel(leave.id)} 
+                              className="btn btn-danger text-xs px-2 py-1"
+                              disabled={leave.status !== 'pending'}
+                              style={{ fontSize: '0.7rem' }}
+                            >
                               Cancel
                             </button>
                           </div>
                         </div>
-                        <div className="mt-2 sm:flex sm:justify-between">
-                          <div className="sm:flex">
-                            <p className="flex items-center text-sm text-gray-500">
-                              {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                            <p>Applied on {new Date(leave.createdAt).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                        <div className="mt-2 flex justify-between">
-                          <p className="text-sm text-gray-500">
-                            Reason: {leave.reason}
+                        
+                        <div className="mt-2 flex flex-col sm:flex-row sm:justify-between gap-1">
+                          <p className="text-xs text-gray-500">
+                            {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
                           </p>
-                          <button onClick={() => openModal(leave)}>
-                            <InformationCircleIcon className="w-5 h-5 mr-2 text-blue-500 hover:text-blue-600 cursor-pointer" />
+                          <p className="text-xs text-gray-500">
+                            Applied: {new Date(leave.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        
+                        <div className="mt-2 flex justify-between items-start">
+                          <p className="text-xs text-gray-500 pr-2" style={{ maxWidth: 'calc(100% - 30px)' }}>
+                            <span className="font-medium">Reason:</span> {leave.reason}
+                          </p>
+                          <button 
+                            onClick={() => openModal(leave)}
+                            className="flex-shrink-0 mt-1"
+                            aria-label="View approval history"
+                          >
+                            <InformationCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 hover:text-blue-600 cursor-pointer" />
                           </button>
                         </div>
                       </div>
@@ -266,7 +277,11 @@ const LeaveManagement = () => {
                   ))}
                 </ul>
               </div>
-            ) : (<p className='text-center'>No leaves found to cancel</p>)
+            ) : (
+              <div className="bg-white p-4 sm:p-8 rounded-md shadow text-center w-full">
+                <p className="text-gray-500 text-sm">No leaves found</p>
+              </div>
+            )
           }
 
         </div>
@@ -274,69 +289,124 @@ const LeaveManagement = () => {
 
       {/* Apply Leave Modal */}
       {showApplyForm && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Apply for Leave</h2>
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-2 z-50">
+          <div className="bg-white rounded-lg w-full max-w-md p-3 sm:p-6 mx-2" style={{ maxWidth: '95%' }}>
+            <h2 className="text-base sm:text-lg font-medium text-primary-600 mb-3">Apply for Leave</h2>
             <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Leave Type</label>
-                  <select name="type" value={formData.type} onChange={handleInputChange} className="input mt-1" required>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700">Leave Type</label>
+                  <select 
+                    name="type" 
+                    value={formData.type} 
+                    onChange={handleInputChange} 
+                    className="input mt-1 w-full text-xs sm:text-sm py-1" 
+                    required
+                    style={{ height: '36px' }}
+                  >
                     <option value="casual">Casual Leave</option>
                     <option value="sick">Sick Leave</option>
                     <option value="lop">Loss of Pay</option>
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                  <input type="date" name="startDate" min={getDateDaysAgo(3)} value={formData.startDate} onChange={handleInputChange} className="input mt-1 h-8" required />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700">Start Date</label>
+                    <input 
+                      type="date" 
+                      name="startDate" 
+                      min={getDateDaysAgo(3)} 
+                      value={formData.startDate} 
+                      onChange={handleInputChange} 
+                      className="input mt-1 w-full text-xs sm:text-sm" 
+                      required 
+                      style={{ height: '36px' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700">End Date</label>
+                    <input 
+                      type="date" 
+                      name="endDate" 
+                      min={formData.startDate} 
+                      value={formData.endDate} 
+                      onChange={handleInputChange} 
+                      className="input mt-1 w-full text-xs sm:text-sm" 
+                      required 
+                      style={{ height: '36px' }}
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">End Date</label>
-                  <input type="date" name="endDate" min={formData.startDate} value={formData.endDate} onChange={handleInputChange} className="input mt-1 h-8" required />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Reason</label>
-                  <textarea name="reason" value={formData.reason} onChange={handleInputChange} className="input mt-1" rows="3" required />
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700">Reason</label>
+                  <textarea 
+                    name="reason" 
+                    value={formData.reason} 
+                    onChange={handleInputChange} 
+                    className="input mt-1 w-full text-xs sm:text-sm" 
+                    rows="3" 
+                    required 
+                  />
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end space-x-3">
-                <button type="button" onClick={() => setShowApplyForm(false)} className="btn btn-danger">Cancel</button>
-                <button type="submit" className="btn btn-primary">Apply</button>
+              <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setShowApplyForm(false)} 
+                  className="btn btn-danger w-full sm:w-auto order-2 sm:order-1 text-xs sm:text-sm py-1 px-3"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary w-full sm:w-auto order-1 sm:order-2 text-xs sm:text-sm py-1 px-3"
+                >
+                  Apply
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* leaveInfo modal */}
+      {/* Approval History Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-md">
-            <h2 className="text-lg text-primary-600 font-semibold mb-4">Approval History</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2">
+          <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6 w-full mx-2" style={{ maxWidth: '95%', maxHeight: '90vh' }}>
+            <h2 className="text-base sm:text-lg text-primary-600 font-semibold mb-3">Approval History</h2>
             {selectedHistory.length === 0 ? (
-              <p>No approval history available.</p>
+              <div className="py-3 text-center text-gray-500">
+                <p className="text-xs sm:text-sm">No approval history available.</p>
+              </div>
             ) : (
-              <ul className="space-y-2 max-h-64 overflow-y-auto">
+              <ul className="space-y-2 max-h-[60vh] overflow-y-auto pr-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {selectedHistory.map((entry, idx) => (
-                  <li key={idx} className="border-b pb-2">
-                    <p><strong>Action:</strong> {entry.action}</p>
-                    <p><strong>By:</strong> {entry.employeeName || entry.by}</p>
-                    {entry.comment && <p><strong>Comment:</strong> {entry.comment}</p>}
-                    <p><strong>Time:</strong> {new Date(entry.timestamp).toLocaleString()}</p>
+                  <li key={idx} className="border-b pb-2 text-xs sm:text-sm">
+                    <div className="flex flex-wrap justify-between items-start gap-1">
+                      <p className="font-medium text-primary-600">{entry.action}</p>
+                      <p className="text-xs text-gray-500" style={{ fontSize: '0.65rem' }}>
+                        {new Date(entry.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                    <p className="mt-1"><span className="font-medium">By:</span> {entry.employeeName || entry.by}</p>
+                    {entry.comment && (
+                      <p className="mt-1 text-gray-700">
+                        <span className="font-medium">Comment:</span> {entry.comment}
+                      </p>
+                    )}
                   </li>
                 ))}
               </ul>
             )}
-            <div className="mt-4 text-right">
+            <div className="mt-4 flex justify-center">
               <button
-                className="px-4 py-2 btn btn-primary text-white rounded "
+                className="btn btn-primary w-full text-xs sm:text-sm py-1 px-3"
                 onClick={closeModal}
-                
+                style={{ maxWidth: '200px' }}
               >
                 Close
               </button>

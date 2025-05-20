@@ -79,109 +79,109 @@ const Dashboard = () => {
   }
 
   return (
-    <div className=" bg-gray-100">
-
-      <main className="max-w-7xl mx-auto ">
-        
-
+    <div className="bg-gray-100 min-h-screen w-full px-4 py-6 sm:px-6 lg:px-8">
+      <main className="w-full max-w-7xl mx-auto">
         {/* Leave Balance Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card bg-white">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Casual Leave</h3>
-            <p className="text-3xl font-bold text-primary-600">{leaveBalance?.casual || 0}</p>
-            <p className="text-sm text-gray-500">days remaining</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white p-4 rounded shadow">
+            <h3 className="text-sm sm:text-lg font-medium text-gray-900 mb-1">Casual Leave</h3>
+            <p className="text-xl sm:text-3xl font-bold text-primary-600">{leaveBalance?.casual || 0}</p>
+            <p className="text-xs sm:text-sm text-gray-500">days remaining</p>
           </div>
 
-          <div className="card bg-white">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Sick Leave</h3>
-            <p className="text-3xl font-bold text-primary-600">{leaveBalance?.sick || 0}</p>
-            <p className="text-sm text-gray-500">days remaining</p>
+          <div className="bg-white p-4 rounded shadow">
+            <h3 className="text-sm sm:text-lg font-medium text-gray-900 mb-1">Sick Leave</h3>
+            <p className="text-xl sm:text-3xl font-bold text-primary-600">{leaveBalance?.sick || 0}</p>
+            <p className="text-xs sm:text-sm text-gray-500">days remaining</p>
           </div>
 
-          <div className="card bg-white">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Loss of Pay</h3>
-            <p className="text-3xl font-bold text-primary-600">{leaveBalance?.lop || 0}</p>
-            <p className="text-sm text-gray-500">days taken</p>
+          <div className="bg-white p-4 rounded shadow">
+            <h3 className="text-sm sm:text-lg font-medium text-gray-900 mb-1">Loss of Pay</h3>
+            <p className="text-xl sm:text-3xl font-bold text-primary-600">{leaveBalance?.lop || 0}</p>
+            <p className="text-xs sm:text-sm text-gray-500">days taken</p>
           </div>
         </div>
 
         {/* Recent Leaves */}
-        <div className="card">
-          <div className="flex flex-wrap justify-between items-center mb-4 ">
-            <h2 className="text-xl font-semibold text-gray-900">History of Leaves</h2>
+        <div className="bg-white p-2 sm:p-4 rounded shadow">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">History of Leaves</h2>
 
-            <div className='flex gap-6 items-center'>
-              <div className='space-x-4'>
-                <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                  <option value="all">leave type</option>
-                  <option value="casual">Casual</option>
-                  <option value="sick">Sick</option>
-                  <option value="lop">Loss of Pay</option>
-                </select>
+        <div className="flex flex-col gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <select
+              className="border rounded px-2 py-1 text-sm w-full sm:w-auto"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <option value="all">Leave Type</option>
+              <option value="casual">Casual</option>
+              <option value="sick">Sick</option>
+              <option value="lop">Loss of Pay</option>
+            </select>
 
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                  <option value="all">status</option>
-                  <option value="approved">Approved</option>
-                  <option value="pending">Pending</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="forwarded">Forwarded</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-              <button
-                onClick={() => navigate('/leaves')}
-                className="btn btn-primary"
-              >
-                Apply / Cancel Leave
-              </button>
-            </div>
+            <select
+              className="border rounded px-2 py-1 text-sm w-full sm:w-auto"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">Status</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
+              <option value="forwarded">Forwarded</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
           </div>
 
-          <div className="overflow-x-auto max-h-[50dvh] overflow-y-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Duration
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Applied On
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {recentLeaves
-                  .filter((leave) =>
-                    (typeFilter === 'all' || leave.type === typeFilter) &&
-                    (statusFilter === 'all' || leave.status.toLowerCase() === statusFilter.toLowerCase()))
-                  .map((leave) => (
-                    <tr key={leave.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {leave.type}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`badge ${getStatusBadgeClass(leave.status)}`}>
-                          {leave.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(leave.createdAt).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
+          <button
+            onClick={() => navigate('/leaves')}
+            className="btn btn-primary text-white text-sm px-4 py-2 rounded w-full sm:w-auto"
+          >
+            Apply / Cancel Leave
+          </button>
         </div>
+
+        <div className="min-w-40 max-w-[40vw] sm:max-w-[80vw] overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 text-[12px] sm:text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-2 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th className="px-2 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                <th className="px-2 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-2 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Applied On</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {recentLeaves
+                .filter((leave) =>
+                  (typeFilter === 'all' || leave.type === typeFilter) &&
+                  (statusFilter === 'all' || leave.status.toLowerCase() === statusFilter.toLowerCase()))
+                .map((leave) => (
+                  <tr key={leave.id}>
+                    <td className="px-2 py-2 whitespace-nowrap">{leave.type}</td>
+                    <td className="px-2 py-2 whitespace-nowrap">
+                      <span className="hidden sm:inline">
+                        {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
+                      </span>
+                      <span className="sm:hidden">
+                        {new Date(leave.startDate).toLocaleDateString().split('/').slice(0, 2).join('/')} - 
+                        {new Date(leave.endDate).toLocaleDateString().split('/').slice(0, 2).join('/')}
+                      </span>
+                    </td>
+                    <td className="px-2 py-2 whitespace-nowrap">
+                      <span className={`badge ${getStatusBadgeClass(leave.status)}`}>
+                        {leave.status}
+                      </span>
+                    </td>
+                    <td className="px-2 py-2 whitespace-nowrap">
+                      {new Date(leave.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
       </main>
     </div>
   );
