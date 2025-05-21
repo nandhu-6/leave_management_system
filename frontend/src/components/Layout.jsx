@@ -163,7 +163,7 @@ const Layout = ({ children }) => {
           <h1 className="text-sm sm:text-2xl font-bold text-white">{pageTitle}</h1>
           <div ref={dropdownRef}>
             <button className='relative' onClick={handleShow}>
-              <span className="flex items-center font-semibold text-white space-x-1 text-sm sm:text-2xl">
+              <span className="flex items-center font-semibold text-white space-x-1 text-sm sm:text-lg">
                 <UserIcon className="w-4 h-4" />
                 <span>{user.name}</span>
               </span>
