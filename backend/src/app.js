@@ -18,6 +18,12 @@ app.use('/auth', authRoutes);
 app.use('/employees',authenticate, employeeRoutes);
 app.use('/leaves',authenticate, leaveRoutes);
 
+
+
+
+
+
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);

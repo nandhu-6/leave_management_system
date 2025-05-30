@@ -27,7 +27,7 @@ const Register = () => {
   const handlePasswordChange = (e) => {
     const value = e.target.value;
     setPassword(value);
-    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    const passwordPattern =/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
     setPasswordError(
       passwordPattern.test(value)
         ? ''

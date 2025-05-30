@@ -27,7 +27,7 @@ const LeaveManagement = () => {
   const [filter, setFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState(null);
-  
+
 
   const getDateDaysAgo = (days) => {
     const date = new Date();
@@ -142,19 +142,19 @@ const LeaveManagement = () => {
   const openModal = async (leaveInfo) => {
     try {
       const parsedLeaveInfo = JSON.parse(leaveInfo.approvalHistory);
-      
+
       const historyWithNames = [...parsedLeaveInfo];
-      
+
       setSelectedHistory(historyWithNames);
       setIsModalOpen(true);
-      
+
       const updatedHistory = await Promise.all(
         historyWithNames.map(async (entry) => {
           try {
             // console.log(`Fetching data for employee ID: ${entry.by}`);
             const userName = await getUserById(entry.by);
             // console.log(`Received user data:`, userName);
-            
+
             return {
               ...entry,
               employeeName: userName && userName ? userName : entry.by
@@ -165,11 +165,11 @@ const LeaveManagement = () => {
           }
         })
       );
-      
+
       // Update the history with employee names
       setSelectedHistory(updatedHistory);
       console.log("modal data with names", updatedHistory);
-      
+
     } catch (error) {
       console.log(error.message);
       toast.error("Error parsing approval leave history");
@@ -212,8 +212,8 @@ const LeaveManagement = () => {
               <option value="pending">Pending</option>
               <option value="forwarded">Forwarded</option>
             </select>
-            <button 
-              onClick={() => setShowApplyForm(true)} 
+            <button
+              onClick={() => setShowApplyForm(true)}
               className="btn btn-primary w-full sm:w-auto text-sm py-1 px-3"
             >
               Apply for Leave
@@ -240,17 +240,17 @@ const LeaveManagement = () => {
                             </span>
                           </div>
                           <div className="flex-shrink-0 mt-2 sm:mt-0">
-                            <button 
-                              onClick={() => handleCancel(leave.id)} 
+                            <button
+                              onClick={() => handleCancel(leave.id)}
                               className="btn btn-danger text-xs px-2 py-1"
-                              disabled={leave.status !== 'pending'}
+                              disabled={!['pending', 'forwarded', 'approved'].includes(leave.status.toLowerCase())}
                               style={{ fontSize: '0.7rem' }}
                             >
                               Cancel
                             </button>
                           </div>
                         </div>
-                        
+
                         <div className="mt-2 flex flex-col sm:flex-row sm:justify-between gap-1">
                           <p className="text-xs text-gray-500">
                             {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
@@ -259,12 +259,12 @@ const LeaveManagement = () => {
                             Applied: {new Date(leave.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        
+
                         <div className="mt-2 flex justify-between items-start">
                           <p className="text-xs text-gray-500 pr-2" style={{ maxWidth: 'calc(100% - 30px)' }}>
                             <span className="font-medium">Reason:</span> {leave.reason}
                           </p>
-                          <button 
+                          <button
                             onClick={() => openModal(leave)}
                             className="flex-shrink-0 mt-1"
                             aria-label="View approval history"
@@ -290,17 +290,17 @@ const LeaveManagement = () => {
       {/* Apply Leave Modal */}
       {showApplyForm && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-2 z-50">
-          <div className="bg-white rounded-lg w-full max-w-md p-3 sm:p-6 mx-2" style={{ maxWidth: '95%' }}>
+          <div className="bg-white rounded-lg w-full max-w-md p-3 sm:p-6 mx-2">
             <h2 className="text-base sm:text-lg font-medium text-primary-600 mb-3">Apply for Leave</h2>
             <form onSubmit={handleSubmit}>
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700">Leave Type</label>
-                  <select 
-                    name="type" 
-                    value={formData.type} 
-                    onChange={handleInputChange} 
-                    className="input mt-1 w-full text-xs sm:text-sm py-1" 
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    className="input mt-1 w-full text-xs sm:text-sm py-1"
                     required
                     style={{ height: '36px' }}
                   >
@@ -313,28 +313,28 @@ const LeaveManagement = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700">Start Date</label>
-                    <input 
-                      type="date" 
-                      name="startDate" 
-                      min={getDateDaysAgo(3)} 
-                      value={formData.startDate} 
-                      onChange={handleInputChange} 
-                      className="input mt-1 w-full text-xs sm:text-sm" 
-                      required 
+                    <input
+                      type="date"
+                      name="startDate"
+                      min={getDateDaysAgo(3)}
+                      value={formData.startDate}
+                      onChange={handleInputChange}
+                      className="input mt-1 w-full text-xs sm:text-sm"
+                      required
                       style={{ height: '36px' }}
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700">End Date</label>
-                    <input 
-                      type="date" 
-                      name="endDate" 
-                      min={formData.startDate} 
-                      value={formData.endDate} 
-                      onChange={handleInputChange} 
-                      className="input mt-1 w-full text-xs sm:text-sm" 
-                      required 
+                    <input
+                      type="date"
+                      name="endDate"
+                      min={formData.startDate}
+                      value={formData.endDate}
+                      onChange={handleInputChange}
+                      className="input mt-1 w-full text-xs sm:text-sm"
+                      required
                       style={{ height: '36px' }}
                     />
                   </div>
@@ -342,27 +342,27 @@ const LeaveManagement = () => {
 
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700">Reason</label>
-                  <textarea 
-                    name="reason" 
-                    value={formData.reason} 
-                    onChange={handleInputChange} 
-                    className="input mt-1 w-full text-xs sm:text-sm" 
-                    rows="3" 
-                    required 
+                  <textarea
+                    name="reason"
+                    value={formData.reason}
+                    onChange={handleInputChange}
+                    className="input mt-1 w-full text-xs sm:text-sm"
+                    rows="3"
+                    required
                   />
                 </div>
               </div>
 
               <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3">
-                <button 
-                  type="button" 
-                  onClick={() => setShowApplyForm(false)} 
+                <button
+                  type="button"
+                  onClick={() => setShowApplyForm(false)}
                   className="btn btn-danger w-full sm:w-auto order-2 sm:order-1 text-xs sm:text-sm py-1 px-3"
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn btn-primary w-full sm:w-auto order-1 sm:order-2 text-xs sm:text-sm py-1 px-3"
                 >
                   Apply
@@ -376,7 +376,7 @@ const LeaveManagement = () => {
       {/* Approval History Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2">
-          <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6 w-full mx-2" style={{ maxWidth: '95%', maxHeight: '90vh' }}>
+          <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6 w-[50vw] overflow-y-auto mx-2" >
             <h2 className="text-base sm:text-lg text-primary-600 font-semibold mb-3">Approval History</h2>
             {selectedHistory.length === 0 ? (
               <div className="py-3 text-center text-gray-500">

@@ -29,7 +29,7 @@ const EmployeeManagement = () => {
       const data = await getAllEmployees();
       setEmployees(data);
       console.log("employees", data);
-      
+
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to fetch employees');
     } finally {
@@ -46,7 +46,7 @@ const EmployeeManagement = () => {
     }
   };
   // console.log("managers", managers);
-  
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -70,6 +70,7 @@ const EmployeeManagement = () => {
         reportingManagerId: ''
       });
       fetchEmployees();
+      toast.success('Employee added successfully');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to add employee');
     }
@@ -89,6 +90,7 @@ const EmployeeManagement = () => {
         reportingManagerId: ''
       });
       fetchEmployees();
+      toast.success('Employee updated successfully');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to edit employee');
     }
@@ -100,7 +102,8 @@ const EmployeeManagement = () => {
     }
 
     try {
-      await deleteEmployee(employeeId);;
+      await deleteEmployee(employeeId);
+      toast.success('Employee deleted successfully');
       fetchEmployees();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete employee');

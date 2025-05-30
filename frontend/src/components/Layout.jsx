@@ -145,15 +145,7 @@ const Layout = ({ children }) => {
             ))}
           </ul>
         </nav>
-        {/* <div className={`${collapsed ? 'p-2' : 'p-6'} border-t border-gray-200`}>
-          <button
-            onClick={logout}
-            className={`w-full btn bg-slate-100 hover:bg-slate-50 ${collapsed ? 'p-2' : ''}`}
-            title={collapsed ? "Logout" : ""}
-          >
-            {collapsed ? <UserIcon className="h-5 w-5 mx-auto" /> : "Logout"}
-          </button>
-        </div> */}
+        
       </aside>
       {/* Main Content */}
       <div className="flex-1 flex flex-col">

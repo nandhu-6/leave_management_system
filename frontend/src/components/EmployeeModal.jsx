@@ -1,19 +1,19 @@
 import React from 'react';
 
-const EmployeeModal = ({ 
-  isOpen, 
-  onClose, 
-  formData, 
-  handleInputChange, 
-  handleSubmit, 
-  managers, 
-  isEdit 
+const EmployeeModal = ({
+  isOpen,
+  onClose,
+  formData,
+  handleInputChange,
+  handleSubmit,
+  managers,
+  isEdit
 }) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
+      <div className="bg-white rounded-lg max-w-md w-full p-6 h-[400px] overflow-y-auto">
         <h2 className="text-lg font-medium text-gray-900 mb-4">
           {isEdit ? 'Edit Employee' : 'Add Employee'}
         </h2>
@@ -84,6 +84,43 @@ const EmployeeModal = ({
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Casual Leave Balance
+              </label>
+              <input
+                type="number"
+                name="casualLeaveBalance"
+                value={formData.casualLeaveBalance}
+                onChange={handleInputChange}
+                className="input mt-1 h-8"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Sick Leave Balance
+              </label>
+              <input
+                type="number"
+                name="sickLeaveBalance"
+                value={formData.sickLeaveBalance}
+                onChange={handleInputChange}
+                className="input mt-1 h-8"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                LOP Count
+              </label>
+              <input
+                type="number"
+                name="lopCount"
+                value={formData.lopCount}
+                onChange={handleInputChange}
+                className="input mt-1 h-8"
+              />
             </div>
           </div>
 
