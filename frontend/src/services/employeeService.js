@@ -38,7 +38,7 @@ export const getProfile = async () => {
 }
 
 
-export const getTeam = async() => {
+export const getTeam = async () => {
   const response = await axios.get(`${API_URL}/team`);
   return response.data;
 }

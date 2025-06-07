@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { PendingApprovalsProvider } from './context/PendingApprovalsContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -10,6 +11,7 @@ import { ToastContainer } from 'react-toastify';
 import PendingApprovals from './pages/PendingApprovals';
 import Profile from './pages/Profile';
 import Calendar from './pages/Calendar';
+import TeamCalendar from './pages/TeamCalendar';
 import Layout from './components/Layout';
 import { ONLY_HR, MANAGER_DIRECTOR_HR } from './constants/constant';
 
@@ -39,92 +41,105 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 const App = () => {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <Profile />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/leaves"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <LeaveManagement />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/pending-approvals"
-            element={
-              <ProtectedRoute allowedRoles={MANAGER_DIRECTOR_HR}>
-                <Layout>
-                  <PendingApprovals />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/employees"
-            element={
-              <ProtectedRoute allowedRoles={ONLY_HR}>
-                <Layout>
-                  <EmployeeManagement />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/calendar"
-            element={
-              <ProtectedRoute >
-                <Layout>
-                  <Calendar />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          
-        </Routes>
-      </Router>
-      <ToastContainer autoClose={3000} position='top-right' />
+      <PendingApprovalsProvider>
+        <Router>
+          <Routes>
+
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Profile />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/leaves"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <LeaveManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/pending-approvals"
+              element={
+                <ProtectedRoute allowedRoles={MANAGER_DIRECTOR_HR}>
+                  <Layout>
+                    <PendingApprovals />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/employees"
+              element={
+                <ProtectedRoute allowedRoles={ONLY_HR}>
+                  <Layout>
+                    <EmployeeManagement />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute >
+                  <Layout>
+                    <Calendar />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/team-calendar"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <TeamCalendar />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+          </Routes>
+        </Router>
+        <ToastContainer autoClose={3000} position='top-right' />
+      </PendingApprovalsProvider>
     </AuthProvider>
   );
 };

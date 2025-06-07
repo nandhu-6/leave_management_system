@@ -21,29 +21,34 @@ export const cancelLeave = async (leaveId) => {
   return response.data;
 };
 
-export const PendingApprovalsService = async () => { 
+export const PendingApprovalsService = async () => {
   const response = await axios.get(`${API_URL}/pending-approvals`);
   return response.data;
 };
 
 export const submitLeaveAction = async (leaveId, action, comment) => {
   return await axios.post(`${API_URL}/${leaveId}/${action}`, {
-    action : action.includes('approve')? 'approve' :'reject'  , 
+    action: action.includes('approve') ? 'approve' : 'reject',
     comment,
   });
 };
 
-export const teamLeaves = async() => {
+export const teamLeaves = async () => {
   const response = await axios.get(`${API_URL}/team-leaves`);
   return response.data;
 }
 
-export const allLeaves = async() => {
+export const allLeaves = async () => {
   const response = await axios.get(`${API_URL}/all`);
   return response.data;
 }
 
-export const getHolidays = async()=> {
+export const getHolidays = async () => {
   const response = await axios.get(`${API_URL}/holidays`);
+  return response.data;
+}
+
+export const getTeamCalendar = async () => {
+  const response = await axios.get(`${API_URL}/team-calendar`);
   return response.data;
 }

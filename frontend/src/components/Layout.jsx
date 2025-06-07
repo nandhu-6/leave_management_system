@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePendingApprovals } from '../context/PendingApprovalsContext';
 import { ONLY_HR, MANAGER_DIRECTOR_HR, ALL_ROLES } from '../constants/constant';
 
 import {
@@ -53,6 +54,12 @@ const navItems = [
     icon: <CalendarIcon className="h-6 w-6" />,
     roles: ALL_ROLES,
   },
+  {
+    label: 'Team Calendar',
+    to: '/team-calendar',
+    icon: <CalendarIcon className="h-6 w-6" />,
+    roles: ALL_ROLES,
+  },
 ];
 
 const pageTitles = {
@@ -61,11 +68,13 @@ const pageTitles = {
   '/leaves': 'Apply Leave',
   '/pending-approvals': 'Pending Approvals',
   '/employees': 'Manage Employees',
-  '/calendar': 'Team Calendar',
+  '/calendar': 'Calendar',
+  '/team-calendar': 'Team Calendar',
 };
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
+  const { pendingCount } = usePendingApprovals();
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
@@ -89,9 +98,9 @@ const Layout = ({ children }) => {
   const mainContentPadding = collapsed ? 'pl-[70px]' : 'pl-[235px]';
   const dropdownRef = useRef(null);
 
-  useEffect (() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current &&!dropdownRef.current.contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShow(false);
       }
     };
@@ -134,10 +143,15 @@ const Layout = ({ children }) => {
                   onClick={() => navigate(item.to)}
                   title={collapsed ? item.label : ''}
                 >
-                  <div className="flex-shrink-0 w-6">
+                  <div className="flex-shrink-0 w-6 relative">
                     {item.icon}
+                    {item.label === 'Pending Approvals' && pendingCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                        {pendingCount > 9 ? '9+' : pendingCount}
+                      </span>
+                    )}
                   </div>
-                  <span className={`ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 ${collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                  <span className={`ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 ${collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'} flex items-center`}>
                     {item.label}
                   </span>
                 </button>
@@ -145,13 +159,13 @@ const Layout = ({ children }) => {
             ))}
           </ul>
         </nav>
-        
+
       </aside>
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="min-h-12 sm:min-h-16 bg-[#5141a1] shadow flex flex-wrap justify-between items-center px-4 sm:px-8 sticky top-0 z-10 relative">
-        {/* <header className="h-8 sm:h-16  bg-[#5141a1] shadow flex justify-between items-center px-8 sticky top-0 z-10 relative"> */}
+          {/* <header className="h-8 sm:h-16  bg-[#5141a1] shadow flex justify-between items-center px-8 sticky top-0 z-10 relative"> */}
           <h1 className="text-sm sm:text-2xl font-bold text-white">{pageTitle}</h1>
           <div ref={dropdownRef}>
             <button className='relative' onClick={handleShow}>

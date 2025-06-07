@@ -5,6 +5,7 @@ const { In } = require('typeorm');
 const { AppDataSource } = require('../config/database');
 const { Employee } = require('../entities/Employee');
 const { ONLY_HR, MANAGER_DIRECTOR_HR } = require('../constants/constant');
+const { log } = require('winston');
 
 
 
@@ -199,16 +200,16 @@ const getUserById = async (req, res) => {
     try {
         const { id } = req.params; // Extract the id parameter from req.params
         logger.info(`Fetching user with id: ${id}`);
-        
+
         const user = await AppDataSource.getRepository(Employee).findOne({
             where: { id: id }
         });
-        
+
         if (!user) {
             logger.error(`User with id ${id} not found`);
             return res.status(404).json({ message: 'User not found' });
         }
-        
+
         res.json(user.name);
     }
     catch (error) {
@@ -216,6 +217,8 @@ const getUserById = async (req, res) => {
         res.status(500).json({ message: 'Error fetching user', error: error.message });
     }
 };
+
+
 
 module.exports = {
     getAllEmployees,

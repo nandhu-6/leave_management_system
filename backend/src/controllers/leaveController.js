@@ -203,7 +203,7 @@ const applyLeave = async (req, res) => {
         }
         res.status(500).json({ message: 'Error applying for leave', error: error.message });
         logger.error('Error applying for leave', error);
-};
+    };
 };
 
 // Approve leave
@@ -596,11 +596,93 @@ const getHolidays = async (req, res) => {
     try {
         res.send({ holidays });
     }
-    catch(error) {
+    catch (error) {
         res.status(500).json({ message: 'Error fetching holidays', error: error.message });
         logger.error('Error fetching holidays', error);
     }
 }
+
+const getTeamCalendar = async (req, res) => {
+    try {
+        const employeeId = req.user.id;
+
+        const employeeRepo = AppDataSource.getRepository(Employee);
+        console.log("employee repo done");
+
+
+        const leaveRepo = AppDataSource.getRepository(Leave);
+        console.log("leave repo done");
+
+
+        const employee = await employeeRepo.findOneBy({ id: employeeId });
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+        console.log("not employee done");
+
+        // Fetch peers (same manager, excluding self)
+        let peers = [];
+        // if (employee.reportingManagerId) {
+        peers = await employeeRepo.find({
+            where: {
+                reportingManagerId: employee.reportingManagerId,
+            },
+        });
+        console.log("peers done");
+
+        // }
+
+        // Fetch reportees
+        const reportees = await employeeRepo.find({
+            where: { reportingManagerId: employeeId },
+        });
+        console.log("reportees done");
+
+
+        // Combine peers + reportees
+        const teamMembers = [...peers, ...reportees];
+        console.log("TM done");
+        console.log("Team Member IDs", teamMembers.map(e => e.id));
+
+        // const allLeaves = await leaveRepo.find({ relations: ['employee'] });
+        // console.log("All Leaves:", allLeaves);
+
+        const teamIds = teamMembers.map(e => e.id);
+
+        // Fetch approved leave data for team members
+        const leaves = await leaveRepo.find({
+            where: {
+                employeeId: In(teamIds),
+                status: LeaveStatus.APPROVED,
+            },
+            relations: ['employee'],
+        });
+        console.log("leave", leaves);
+
+        // Map employeeId to leave(s)
+        const leaveMap = new Map();
+        leaves.forEach(leave => {
+            const empId = leave.employee.id;
+            if (!leaveMap.has(empId)) {
+                leaveMap.set(empId, []);
+            }
+            leaveMap.get(empId).push(leave);
+        });
+        console.log("leave maps done");
+
+
+        // Final team calendar response
+        const teamCalendar = teamMembers.map(emp => ({
+            employee: emp,
+            leaves: leaveMap.get(emp.id) || [],
+        }));
+
+        return res.status(200).json(teamCalendar);
+    } catch (error) {
+        console.error('Error fetching team calendar', error);
+        return res.status(500).json({ message: 'Error fetching team calendar', error: error.message });
+    }
+};
 
 module.exports = {
     applyLeave,
@@ -613,5 +695,6 @@ module.exports = {
     cancelLeave,
     getAllLeaves,
     getLeaveStatus,
-    getHolidays
+    getHolidays,
+    getTeamCalendar
 };

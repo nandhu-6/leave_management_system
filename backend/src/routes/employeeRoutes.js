@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const {ONLY_HR, MANAGER_DIRECTOR_HR } = require('../constants/constant');
-const {getProfile, getReportingManager, getTeam, getManagers, getAllEmployees, createEmployee, updateEmployee, deleteEmployee, getUserById} = require('../controllers/employeeController');
-const {authorize } = require('../middleware/auth');
+const { ONLY_HR, MANAGER_DIRECTOR_HR } = require('../constants/constant');
+const { getProfile, getReportingManager, getTeam, getManagers, getAllEmployees, createEmployee, updateEmployee, deleteEmployee, getUserById, getTeamMembers } = require('../controllers/employeeController');
+const { authorize } = require('../middleware/auth');
 
 // Open routes (for all authenticated users)
 router.get('/profile', getProfile); //
@@ -10,7 +10,7 @@ router.get('/reporting-manager', getReportingManager) //
 router.get('/userById/:id', getUserById)
 
 // Manager, Director, and HR routes
-router.get('/team', authorize(MANAGER_DIRECTOR_HR),getTeam); //
+router.get('/team', authorize(MANAGER_DIRECTOR_HR), getTeam); //
 router.get('/managers', authorize(ONLY_HR), getManagers);
 
 // HR only routes

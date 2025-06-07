@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { submitLeaveAction, PendingApprovalsService } from '../services/leaveService';
 import { useAuth } from '../context/AuthContext';
+import { usePendingApprovals } from '../context/PendingApprovalsContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
 const PendingApprovals = () => {
   const { user } = useAuth();
+  const { fetchPendingCount } = usePendingApprovals();
   const [teamLeaves, setTeamLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [showActionModal, setShowActionModal] = useState(false);
   const [actionComment, setActionComment] = useState('');
-  const [action, setAction ] = useState('');
+  const [action, setAction] = useState('');
 
   useEffect(() => {
     fetchTeamLeaves();
@@ -21,9 +22,10 @@ const PendingApprovals = () => {
 
   const fetchTeamLeaves = async () => {
     try {
-      const data = await PendingApprovalsService(); 
+      const data = await PendingApprovalsService();
       setTeamLeaves(data);
-      console.log("response", data);
+      // Update the pending count in the context
+      fetchPendingCount();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to fetch teamleaves');
     } finally {
@@ -44,8 +46,6 @@ const PendingApprovals = () => {
       setActionComment('');
       fetchTeamLeaves();
     } catch (err) {
-      // console.log("error", err.response);
-      
       toast.error(err.response?.data?.message || 'Failed to process leave request');
     }
   };
@@ -85,73 +85,73 @@ const PendingApprovals = () => {
     <div className=" bg-gray-100">
       <div className="max-w-7xl mx-auto py-3">
         <div className="px-4 py-4 sm:px-0">
-          
-{teamLeaves.length > 0  ? (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          {/* Leave List */}
-            <ul className="divide-y divide-gray-200">
-              {teamLeaves.map((leave) => (
-                <li key={leave.id}>
-                  <div className="px-4 py-4 sm:px-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <p className="text-sm font-medium text-primary-600 truncate">
-                          {leave.employee.name} - {leave.type} Leave
-                        </p>
-                        <span className={`ml-2 badge ${getStatusBadgeClass(leave.status)}`}>
-                          {leave.status}
-                        </span>
+
+          {teamLeaves.length > 0 ? (
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              {/* Leave List */}
+              <ul className="divide-y divide-gray-200">
+                {teamLeaves.map((leave) => (
+                  <li key={leave.id}>
+                    <div className="px-4 py-4 sm:px-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <p className="text-sm font-medium text-primary-600 truncate">
+                            {leave.employee.name} - {leave.type} Leave
+                          </p>
+                          <span className={`ml-2 badge ${getStatusBadgeClass(leave.status)}`}>
+                            {leave.status}
+                          </span>
+                        </div>
+                        <div className="ml-2 flex-shrink-0 flex">
+                          {(
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleAction(leave.id, 'approve')}
+                                className="btn btn-success text-sm"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleAction(leave.id, 'reject')}
+                                className="btn btn-danger text-sm"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="ml-2 flex-shrink-0 flex">
-                        { (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleAction(leave.id, 'approve')}
-                              className="btn btn-success text-sm"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => handleAction(leave.id, 'reject')}
-                              className="btn btn-danger text-sm"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        )}
+                      <div className="mt-2 sm:flex sm:justify-between">
+                        <div className="sm:flex">
+                          <p className="flex items-center text-sm text-gray-500">
+                            {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                          <p>
+                            Applied on {new Date(leave.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="mt-2 sm:flex sm:justify-between">
-                      <div className="sm:flex">
-                        <p className="flex items-center text-sm text-gray-500">
-                          {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                        <p>
-                          Applied on {new Date(leave.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Reason: {leave.reason}
-                      </p>
-                    </div>
-                    {leave.comment && (
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
-                          Comment: {leave.comment}
+                          Reason: {leave.reason}
                         </p>
                       </div>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
- ) : (<p className='text-center'>No pending leave requests found.</p>)
-}
+                      {leave.comment && (
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-500">
+                            Comment: {leave.comment}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (<p className='text-center'>No pending leave requests found.</p>)
+          }
 
         </div>
       </div>

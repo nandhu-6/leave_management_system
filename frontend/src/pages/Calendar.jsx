@@ -8,11 +8,11 @@ import { teamLeaves, allLeaves, getMyLeaves, getHolidays } from '../services/lea
 import { useAuth } from '../context/AuthContext';
 import { MANAGER_DIRECTOR_HR } from '../constants/constant';
 
-const leaveColors = {
-  casual: 'bg-primary-300',
-  sick: 'bg-danger',
-  lop: 'bg-warning',
-};
+// const leaveColors = {
+//   casual: 'bg-primary-300',
+//   sick: 'bg-danger',
+//   lop: 'bg-warning',
+// };
 
 const Calendar = () => {
   const { user } = useAuth();
@@ -113,7 +113,7 @@ const Calendar = () => {
           status: leave.status,
         },
       }));
-      
+
       setEvents([...leaveEvents, ...holidayEvents]);
     } catch (err) {
       setEvents([]);
@@ -126,26 +126,26 @@ const Calendar = () => {
   // Toggling between team and individual view
   const toggleViewMode = (mode) => {
     setViewMode(mode);
-    if(mode === 'individual') {
+    if (mode === 'individual') {
       fetchMyLeaves(holidays);
     }
     else {
       fetchTeamLeaves(holidays);
-    } 
+    }
   };
 
   useEffect(() => {
     const initializeCalendar = async () => {
       const holidayEvents = await fetchHolidays();
-      
-      if(canViewTeamLeaves && viewMode === 'team') {
+
+      if (canViewTeamLeaves && viewMode === 'team') {
         await fetchTeamLeaves(holidayEvents);
       }
       else {
         await fetchMyLeaves(holidayEvents);
       }
     };
-    
+
     initializeCalendar();
   }, []);
 
@@ -153,10 +153,10 @@ const Calendar = () => {
     if (eventInfo.event.display === 'background') {
       return null;
     }
-    
+
     const leaveType = eventInfo.event.extendedProps.type;
     let bgColor = '';
-    
+
     if (leaveType === 'casual') {
       bgColor = 'bg-primary-300';
     } else if (leaveType === 'sick') {
@@ -166,7 +166,7 @@ const Calendar = () => {
     } else {
       bgColor = 'bg-warning';
     }
-    
+
     return (
       <div className="flex flex-col w-full">
         <span className={`font-semibold text-[10px] h-4 border px-1 overflow-hidden ${bgColor} text-white text-center`}>
@@ -180,21 +180,21 @@ const Calendar = () => {
     if (info.event.display === 'background') {
       return;
     }
-    
+
     const extendedProps = info.event.extendedProps;
     const tooltip = document.createElement('div');
     tooltip.className =
       'fixed z-50 p-2 rounded shadow-lg bg-white border text-xs text-gray-900';
     tooltip.style.top = info.jsEvent.clientY + 10 + 'px';
     tooltip.style.left = info.jsEvent.clientX + 10 + 'px';
-    
+
     if (extendedProps.type === 'holiday') {
       tooltip.innerHTML = `<b>${info.event.title}</b><br/>Holiday`;
     } else {
       const { employee, type, reason, status } = extendedProps;
       tooltip.innerHTML = `<b>${employee}</b><br/>Type: ${type}<br/>Status: ${status}<br/>Reason: ${reason}`;
     }
-    
+
     tooltip.id = 'calendar-tooltip';
     document.body.appendChild(tooltip);
   };

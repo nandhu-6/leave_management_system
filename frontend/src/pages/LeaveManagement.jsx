@@ -20,13 +20,14 @@ const LeaveManagement = () => {
   const [formData, setFormData] = useState({
     startDate: '',
     endDate: '',
-    type: 'casual',
+    type: '',
     reason: ''
   });
   const [leaveBalance, setLeaveBalance] = useState(null);
   const [filter, setFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState(null);
+  const [dayCount, setDayCount] = useState({ totalDays: 0, workingDays: 0 });
 
 
   const getDateDaysAgo = (days) => {
@@ -78,11 +79,15 @@ const LeaveManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const updatedForm = { ...formData, [name]: value };
+    setFormData(updatedForm);
+
+    if (updatedForm.startDate && updatedForm.endDate) {
+      const { totalDays, workingDays } = calculateDays(updatedForm.startDate, updatedForm.endDate);
+      setDayCount({ totalDays, workingDays });
+    }
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -183,6 +188,22 @@ const LeaveManagement = () => {
   const filteredLeaves = leaves.filter(leave => filter === 'all' || leave.status.toLowerCase() === filter);
   // console.log("leaves", filteredLeaves);
 
+  const calculateDays = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    let totalDays = 0;
+    let workingDays = 0;
+
+    while (startDate <= endDate) {
+      totalDays++;
+      const day = startDate.getDay();
+      if (day !== 0 && day !== 6) {
+        workingDays++;
+      }
+      startDate.setDate(startDate.getDate() + 1);
+    }
+    return { totalDays, workingDays };
+  }
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 p-6">
@@ -304,9 +325,22 @@ const LeaveManagement = () => {
                     required
                     style={{ height: '36px' }}
                   >
-                    <option value="casual">Casual Leave</option>
-                    <option value="sick">Sick Leave</option>
-                    <option value="lop">Loss of Pay</option>
+                    <option value="" disabled hidden > Select a leave type</option>
+                    <option value="casual">
+                      {formData.type === 'casual'
+                        ? 'Casual Leave'
+                        : `Casual Leave - ${leaveBalance.casual} days available`}
+                    </option>
+                    <option value="sick">
+                      {formData.type === 'sick'
+                        ? 'Sick Leave'
+                        : `Sick Leave - ${leaveBalance.sick} days available`}
+                    </option>
+                    <option value="lop">
+                      {formData.type === 'lop'
+                        ? 'Loss of Pay'
+                        : `Loss of Pay - ${leaveBalance.lop} days taken`}
+                    </option>
                   </select>
                 </div>
 
@@ -339,6 +373,13 @@ const LeaveManagement = () => {
                     />
                   </div>
                 </div>
+                {formData.startDate && formData.endDate && (
+                  <div className="text-xs sm:text-sm text-gray-600 flex justify-between">
+                    <p>Total Days Selected: {dayCount.totalDays}</p>
+                    <p>Actual Leave Days: {dayCount.workingDays}</p>
+                  </div>
+                )}
+
 
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700">Reason</label>
