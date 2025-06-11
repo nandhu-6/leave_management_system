@@ -433,13 +433,39 @@ const cancelLeave = async (req, res) => {
         const employee = await employeeRepository.findOne({
             where: { id: leave.employee.id }
         })
-        if (leave.type === LeaveType.CASUAL) {
-            employee.casualLeaveBalance += leave.leaveDuration;
-        } else if (leave.type === LeaveType.SICK) {
-            employee.sickLeaveBalance += leave.leaveDuration;
-        } else if (leave.type === LeaveType.LOP) {
-            employee.lopCount -= leave.leaveDuration;
+        // if (leave.type === LeaveType.CASUAL) {
+        //     employee.casualLeaveBalance += leave.leaveDuration;
+        // } else if (leave.type === LeaveType.SICK) {
+        //     employee.sickLeaveBalance += leave.leaveDuration;
+        // } else if (leave.type === LeaveType.LOP) {
+        //     employee.lopCount -= leave.leaveDuration;
+        // }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const start = new Date(leave.startDate);
+        const end = new Date(leave.endDate);
+
+        let refundableDays = 0;
+        let date = new Date(today > start ? today : start);
+        while (date <= end) {
+            const day = date.getDay();
+            if (day != 0 && day != 6) {
+                refundableDays++;
+            }
+            date.setDate(date.getDate() + 1);
         }
+
+        if (refundableDays > 0) {
+            if (leave.type === LeaveType.CASUAL) {
+                employee.casualLeaveBalance += refundableDays;
+            } else if (leave.type === LeaveType.SICK) {
+                employee.sickLeaveBalance += refundableDays;
+            } else if (leave.type === LeaveType.LOP) {
+                employee.lopCount -= refundableDays;
+            }
+        }
+        leave.leaveDuration -= refundableDays;
+
         await employeeRepository.save(employee);
 
         leave.status = LeaveStatus.CANCELLED;

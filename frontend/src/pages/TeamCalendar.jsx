@@ -218,7 +218,7 @@ const TeamCalendar = () => {
                                         }`}
                                     title={isHoliday(day) ? "Holiday" : ''}
                                 >
-                                    <div className="font-medium text-[10px]">{formatDay(day)}</div>
+                                    {/* <div className="font-medium text-[10px]">{formatDay(day)}</div> */}
                                     <div className="text-[8px]">{day.toLocaleDateString('en-US', { weekday: 'short' }).substring(0, 1)}</div>
                                 </th>
                             ))}
@@ -240,6 +240,7 @@ const TeamCalendar = () => {
                                                 getLeaveType(item.employee.id, day) ? `${getLeaveType(item.employee.id, day)} leave` : ''
                                         }
                                     >
+                                        <div className="font-medium text-[10px]">{formatDay(day)}</div>
                                     </td>
                                 ))}
                             </tr>

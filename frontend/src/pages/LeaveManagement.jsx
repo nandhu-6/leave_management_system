@@ -50,8 +50,13 @@ const LeaveManagement = () => {
       currentDate.setHours(0, 0, 0, 0); // to include today's date
       // console.log("currentDate", currentDate);
       filteredLeaves = filteredLeaves.filter(leave => {
-        const leaveDate = new Date(leave.startDate);
-        return leaveDate >= currentDate;
+        // const leaveDate = new Date(leave.startDate);
+        // return leaveDate >= currentDate;
+        const start = new Date(leave.startDate);
+        const end = new Date(leave.endDate);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+        return end >= currentDate;
       });
 
       filteredLeaves.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
